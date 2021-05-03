@@ -12,8 +12,10 @@ build/
 develop-eggs/
 dist/
 downloads/
+si-env/
 eggs/
 .eggs/
+.idea/
 lib/
 lib64/
 parts/
