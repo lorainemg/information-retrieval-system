@@ -15,8 +15,8 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
         the first line is the title
     """
 
-    def __init__(self, corpus_fd):
-        CorpusAnalyzer.__init__(self, corpus_fd)
+    def __init__(self, corpus_path):
+        CorpusAnalyzer.__init__(self, corpus_path)
         # Regular expresion to extract the id of the document
         self.id_re: Pattern = re.compile(r'\.I (\d+)')
 
@@ -34,10 +34,11 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
                 # había un documento actual que se guarda en la lista de documentos
                 if current_lines is not None:
                     # probablemente haga el preprocesamiento aquí
-                    tokens = self.tokenize(" ".join(current_lines))
+                    tokens = self.preprocess_text(" ".join(current_lines), stemming=False)
                     self.documents[current_id] = Document(current_id, tokens)
                 current_id = m.group(1)
                 current_lines = []
+                getting_words = False
             elif line.startswith('.W'):
                 getting_words = True
             elif getting_words:
