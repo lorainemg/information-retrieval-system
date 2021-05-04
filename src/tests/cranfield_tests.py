@@ -1,5 +1,6 @@
 """Tests a IR Model with a given metric with the Cranfield documents"""
 import re
+import json
 from models import MRI, VectorMRI
 from typing import List, Dict, Tuple
 from corpus import CranCorpusAnalyzer
@@ -70,16 +71,26 @@ def test_model(queries: Dict[int, str], sim_queries: Dict[int, List[Tuple[int, i
         # Recovering the docs
         ranking = model.ranking_function(text)
         # IDs of the recovered docs
-        doc_ids_rec = [d[0] for d in ranking[:len(doc_ids_rel)]]
+        doc_ids_rec = [d[0] for d in ranking[:100]]
         total_score.append(evaluation(doc_ids_rel, doc_ids_rec))
     return sum(total_score) / len(total_score)
 
 
+def save_test_file(results):
+    json.dump(results, open('../../resources/cran_rel.json', 'w+'))
+
+
+def load_test_file():
+    return json.load(open('../../resources/cran_rel.json', 'r+'))
+
+
 def test(mri_model: MRI, evaluation_metric):
     queries = parse_query('../../resources/cran/cran.qry')
-    sim_queries = parse_test_file('../../resources/cran/cranqrel')
-    score = test_model(queries, sim_queries, mri_model, evaluation_metric)
-    print(score)
+    # sim_queries = parse_test_file('../../resources/cran/cranqrel')
+    # save_test_file(sim_queries)
+    sim_queries = load_test_file()
+    # score = test_model(queries, sim_queries, mri_model, evaluation_metric)
+    # print(score)
 
 
 if __name__ == '__main__':
