@@ -16,15 +16,15 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
     """
 
     def __init__(self, corpus_path):
-        CorpusAnalyzer.__init__(self, corpus_path)
         # Regular expresion to extract the id of the document
         self.id_re: Pattern = re.compile(r'\.I (\d+)')
+        CorpusAnalyzer.__init__(self, corpus_path)
 
     def parse_documents(self):
         lines = self.corpus_fd.readlines()
         # current document that is being built
         current_id: int = None
-        current_lines: List[str] = None
+        current_lines: List[str] = []
         # marca cuando empieza el texto del documento actual
         getting_words = False
         for line in lines:
@@ -32,11 +32,11 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
             # se empieza un nuevo documento
             if m is not None:
                 # había un documento actual que se guarda en la lista de documentos
-                if current_lines is not None:
+                if len(current_lines) > 0:
                     # probablemente haga el preprocesamiento aquí
                     tokens = self.preprocess_text(" ".join(current_lines), stemming=False)
-                    self.documents[current_id] = Document(current_id, tokens)
-                current_id = m.group(1)
+                    self.documents.append(Document(current_id, tokens))
+                current_id = int(m.group(1))
                 current_lines = []
                 getting_words = False
             elif line.startswith('.W'):

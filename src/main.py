@@ -1,11 +1,12 @@
 from corpus import CranCorpusAnalyzer
-from pprint import pprint
+from models import VectorMRI
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     analyzer = CranCorpusAnalyzer('../resources/cran/cran.all.1400')
-    analyzer.parse_documents()
-    analyzer.create_document_index()
-    pprint(analyzer.documents)
+    mri = VectorMRI(analyzer)
+    query = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .'
+    similarity = mri.ranking_function(query)
+    print(similarity)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
