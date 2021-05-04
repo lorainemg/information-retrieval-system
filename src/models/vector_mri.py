@@ -1,6 +1,7 @@
 from models.model import MRI
-from typing import Dict
+from typing import Dict, List, Tuple
 import math
+
 
 class VectorMRI(MRI):
     def __init__(self, doc_analyzer):
@@ -8,7 +9,12 @@ class VectorMRI(MRI):
         # parameters in the query weights
         self.a = 0.4  # 0.5
 
-    def ranking_function(self, query: str):
+    def ranking_function(self, query: str) -> List[Tuple[int, float]]:
+        """
+        Main function that returns a sorted ranking of the similarity
+        between the corpus and the query.
+        format: [doc_id, similarity]
+        """
         ranking = []
         query_vect = dict(self.query_parser(query, self.doc_analyzer.index))
         for i, doc in enumerate(self.doc_analyzer.documents):
@@ -19,8 +25,8 @@ class VectorMRI(MRI):
                 w_doc = self.weight_doc(ti, i)
                 w_query = self.weight_query(ti, query_vect)
                 num += w_doc * w_query
-                doc_weights_sqr += w_doc**2
-                query_weights_sqr += w_query**2
+                doc_weights_sqr += w_doc ** 2
+                query_weights_sqr += w_query ** 2
             try:
                 sim = num / math.sqrt(doc_weights_sqr) * math.sqrt(query_weights_sqr)
             except ZeroDivisionError:
@@ -48,8 +54,3 @@ class VectorMRI(MRI):
         N = len(self.doc_analyzer.documents)
         ni = self.doc_analyzer.index.dfs[ti]
         return math.log2(N / ni)
-
-    def get_similarity_docs(self, query: str):
-        """Uses the ranking function and returns the documents with the highest ranking"""
-        ranking = self.ranking_function(query)
-        return [self.doc_analyzer.id2doc(doc_id) for doc_id, _ in ranking]

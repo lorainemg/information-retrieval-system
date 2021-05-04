@@ -1,23 +1,24 @@
+from system import IRSystem
 from corpus import CranCorpusAnalyzer
 from models import VectorMRI
-from retroalimentation import RocchioAlgorithm
+from query_expansion import query_expansion_with_nltk
+from query import QueryParser
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     analyzer = CranCorpusAnalyzer('../resources/cran/cran.all.1400')
     mri = VectorMRI(analyzer)
-    query = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .'
-    similarity = mri.ranking_function(query)
-    print(similarity)
-    print(mri.get_similarity_docs(query))
+    system = IRSystem(mri, analyzer)
 
-    n = similarity[0][1]
-    relevance = [(ti, freq/n) for ti, freq in similarity[:100]]
-    rocchio = RocchioAlgorithm(query, analyzer, relevance)
-    nquery_vect = rocchio()
-    print(nquery_vect)
-    ntokens = rocchio.get_tokens_by_vector(nquery_vect)
-    print(ntokens)
+    query = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .'
+    docs = system.make_query(query)
+    similarity = mri.ranking_function(query)
+
+    relevance = [doc_id for doc_id, freq in similarity[:100] if freq > 10 and freq % 2 == 0]
+    total_docs = [doc_id for doc_id, _ in similarity[:100]]
+    new_query = system.user_feedback(query, relevance, total_docs)
+
+    q_vect = query_expansion_with_nltk(QueryParser().parse(query))
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

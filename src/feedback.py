@@ -5,27 +5,24 @@ from query import QueryParser
 
 
 class RocchioAlgorithm:
-    def __init__(self, query: str, corpus: CorpusAnalyzer, relevance: List[Tuple[int, int]]):
+    def __init__(self, query: str, corpus: CorpusAnalyzer, relevant_docs: List[int], non_relevant_docs: List[int]):
         """
         Initializes the rocchio algorithm, relevance is a list of tuples (doc_id, relevance)
         """
-        self.query = query
         self.corpus = corpus
-        self.relevance = relevance
+        self.rel_docs = relevant_docs
+        self.non_rel_docs = non_relevant_docs
         self.query_vect = QueryParser().get_query_vector(query, corpus.index)
 
     def __call__(self, *, alpha=1, beta=0.75, gamma=0.15):
-        rel_docs = [doc_id for doc_id, relevance in self.relevance if relevance > 0.1]
-        non_rel_docs = [doc_id for doc_id, relevance in self.relevance if relevance <= 0.1]
-
         term1 = {ti: alpha * q for ti, q in self.query_vect}
 
-        sum_rel_docs = self._sum_docs_vect(rel_docs)
-        n = len(rel_docs)
+        sum_rel_docs = self._sum_docs_vect(self.rel_docs)
+        n = len(self.rel_docs)
         term2 = {ti: (beta / n) * v for ti, v in sum_rel_docs.items()}
 
-        sum_non_rel_docs = self._sum_docs_vect(non_rel_docs)
-        n = len(non_rel_docs)
+        sum_non_rel_docs = self._sum_docs_vect(self.non_rel_docs)
+        n = len(self.non_rel_docs)
         term3 = {ti: -(gamma / n) * v for ti, v in sum_non_rel_docs.items()}
 
         new_query = term1
