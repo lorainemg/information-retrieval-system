@@ -1,10 +1,13 @@
+"""Tests a IR Model with a given metric with the Cranfield documents"""
 import re
 from models import MRI, VectorMRI
 from typing import List, Dict, Tuple
 from corpus import CranCorpusAnalyzer
+from evaluation import f1_score
+
 
 def parse_query(query_path: str) -> Dict[int, str]:
-    """Parses the query cranfield file"""
+    """Parses the query Cranfield file"""
     query_fd = open(query_path, 'r+')
 
     queries = {}
@@ -31,6 +34,7 @@ def parse_query(query_path: str) -> Dict[int, str]:
 
 
 def parse_test_file(test_path: str) -> Dict[int, List[Tuple[int, int]]]:
+    """Parses the Cranfield file with the expected doc similarity"""
     test_fd = open(test_path, 'r+')
     # Gets the list of the doc_ids with most similarity sorted
     sim_queries = {}
@@ -50,19 +54,34 @@ def parse_test_file(test_path: str) -> Dict[int, List[Tuple[int, int]]]:
     return sim_queries
 
 
-def test_model(queries: Dict[int, str], sim_queries: Dict[int, List[Tuple[int, int]]], model: MRI):
+def test_model(queries: Dict[int, str], sim_queries: Dict[int, List[Tuple[int, int]]], model: MRI, evaluation):
+    """
+    Given the Cranfield queries and the similarity docs per query of the Cranfield test file
+    and compares the performance of the ri model given a certain metric.
+    """
+    total_score = []
     for query_id, text in queries.items():
-        gold = sim_queries[query_id]
-        result = model.ranking_function(text)
+        # IDs of the relevant docs
+        try:
+            doc_ids_rel = [d[0] for d in sim_queries[query_id]]
+        except KeyError:
+            # the queries in the test and in the file doesn't have the same length
+            break
+        # Recovering the docs
+        ranking = model.ranking_function(text)
+        # IDs of the recovered docs
+        doc_ids_rec = [d[0] for d in ranking[:len(doc_ids_rel)]]
+        total_score.append(evaluation(doc_ids_rel, doc_ids_rec))
+    return sum(total_score) / len(total_score)
 
 
-def test():
+def test(mri_model: MRI, evaluation_metric):
     queries = parse_query('../../resources/cran/cran.qry')
     sim_queries = parse_test_file('../../resources/cran/cranqrel')
-    analyzer = CranCorpusAnalyzer('../resources/cran/cran.all.1400')
-    mri = VectorMRI(analyzer)
-    test_model(queries, sim_queries, mri)
+    score = test_model(queries, sim_queries, mri_model, evaluation_metric)
+    print(score)
 
 
 if __name__ == '__main__':
-    test()
+    mri = VectorMRI(CranCorpusAnalyzer('../../resources/cran/cran.all.1400'))
+    test(mri, f1_score)

@@ -20,7 +20,10 @@ def fbeta_score(relevant: List, recovered: List, beta: float) -> float:
     """Score that harmonize precision and recall"""
     p = precision_score(relevant, recovered)
     r = recall_score(relevant, recovered)
-    return (1 + beta ** 2) / (1 / p + (beta ** 2) / r)
+    try:
+        return (1 + beta ** 2) / (1 / p + (beta ** 2) / r)
+    except ZeroDivisionError:
+        return 0
 
 
 def f1_score(relevant: List, recovered: List) -> float:

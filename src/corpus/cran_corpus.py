@@ -27,7 +27,9 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
         current_lines: List[str] = []
         # marca cuando empieza el texto del documento actual
         getting_words = False
-        for line in lines:
+        current_title: list = []
+        getting_title = False
+        for i, line in enumerate(lines):
             m = self.id_re.match(line)
             # se empieza un nuevo documento
             if m is not None:
@@ -35,11 +37,18 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
                 if len(current_lines) > 0:
                     # probablemente haga el preprocesamiento aquí
                     tokens = self.preprocess_text(" ".join(current_lines), stemming=False)
-                    self.documents.append(Document(current_id, tokens))
+                    self.documents.append(Document(current_id, tokens, " ".join(current_title)))
                 current_id = int(m.group(1))
                 current_lines = []
                 getting_words = False
+                current_title = []
+            elif line.startswith('.T'):
+                getting_title = True
             elif line.startswith('.W'):
                 getting_words = True
+            elif line.startswith('.A'):
+                getting_title = False
             elif getting_words:
-                current_lines.append(line)
+                current_lines.append(line[:-1])
+            elif getting_title:
+                current_title.append(line[:-1])

@@ -36,15 +36,20 @@ class VectorMRI(MRI):
         idf = self.idf(ti)
         return (self.a + (1 - self.a) * tf) * idf
 
-    def weight_doc(self, ti: int, dj: int) -> int:
+    def weight_doc(self, ti: int, dj: int) -> float:
         return self.tf(ti, dj) * self.idf(ti)
 
-    def tf(self, ti: int, dj: int) -> int:
+    def tf(self, ti: int, dj: int) -> float:
         freq = self.doc_analyzer.get_frequency(ti, dj)
         max_freq_tok, max_freq = self.doc_analyzer.get_max_frequency(dj)
         return freq / max_freq
 
-    def idf(self, ti: int):
+    def idf(self, ti: int) -> float:
         N = len(self.doc_analyzer.documents)
         ni = self.doc_analyzer.index.dfs[ti]
         return math.log2(N / ni)
+
+    def get_similarity_docs(self, query: str):
+        """Uses the ranking function and returns the documents with the highest ranking"""
+        ranking = self.ranking_function(query)
+        return [self.doc_analyzer.id2doc(doc_id) for doc_id, _ in ranking]

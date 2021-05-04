@@ -41,6 +41,13 @@ class CorpusAnalyzer:
         docs = [d.tokens for d in self.documents]
         self.index = Dictionary(docs)
 
+    def id2doc(self, doc_id: int) -> Document:
+        """Given a document id returns the documents that matches that id"""
+        for doc in self.documents:
+            if doc.id == doc_id:
+                return doc
+        return None
+
     def docs2bows(self):
         """
         Converts all the document (the list of words) into the bag-of-words representation
