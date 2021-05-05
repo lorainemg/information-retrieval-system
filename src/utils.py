@@ -2,6 +2,7 @@ import nltk
 from gensim import corpora
 from typing import List
 
+
 def remove_punctuation(string: str) -> str:
     punctuation = ".:,!\"#$%&()*+/;<=>?@[\]^_`{|}~?"
     cleaned_str = "                               "
