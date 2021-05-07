@@ -3,9 +3,10 @@ from corpus import CorpusAnalyzer
 from query import QueryParser
 from models import MRI
 from feedback import RocchioAlgorithm
-from typing import List, Tuple
+from typing import List, Tuple, Iterable
 from tools import Document
 from query_expansion import query_expansion_with_nltk
+from clustering import ClusterManager
 
 # TODO: Save the weights for every document in the collection for more efficiency
 # TODO: Save every query stored with the Rocchio algorithm
@@ -15,18 +16,32 @@ class IRSystem:
     def __init__(self, model: MRI, corpus: CorpusAnalyzer):
         self.model = model
         self.corpus = corpus
+        self.clusterer = ClusterManager(corpus)
+        self.clusterer.fit_cluster(12)
+        self.query_parser = QueryParser()
 
     def make_query(self, query: str) -> List[Document]:
         """Makes a query with the loaded corpus and returns the documents sorted for relevancy"""
-        ranking = self.model.ranking_function(query)
-        # maybe should return the ranking for relevance feedback
-        return self.model.get_similarity_docs(ranking)
+        query_vect = self.query_parser(query, self.corpus.index)
 
-    def user_feedback(self, query: str, relevant_docs, total_docs):
+        # Tries to find another vector with the feedback model
+        new_query_vect = RocchioAlgorithm.load_query(query)
+        query_vect = query_vect if new_query_vect is None else new_query_vect
+
+        ranking = self.model.ranking_function(query_vect)
+        docs = self.model.get_similarity_docs(ranking)
+
+        # Doing clustering to return related documents with the one with the highest score
+        related_docs = self.clusterer.get_cluster_samples(docs[0].id)
+        # docs = set(docs[:20]).union(set(related_docs[:10])).union(docs[20:])
+        # maybe should return the ranking for relevance feedback
+        return list(docs)
+
+    def user_feedback(self, query: str, relevant_docs: List[int], total_docs: List[int]):
         """
         Feedback if the user helped
         :param query: The initial query of the user
-        :param relevance: The list of the documents id the user found relevant
+        :param relevant_docs: The list of the documents id the user found relevant
         :param total_docs: The total list of documents id that were showed to the user
         :return: The vector of the new query
         """
@@ -35,6 +50,7 @@ class IRSystem:
         new_query_vect = rocchio()
         new_query_tok = rocchio.get_tokens_by_vector(new_query_vect)
         # No tengo claro que hacer con este vector, posiblemente haga un diccionario estático para guardarlo
+        rocchio.save_query(query, new_query_vect)
         return new_query_vect
 
     def pseudo_feedback(self, query: str, ranking: List[Tuple[int, float]], k=10):
@@ -48,6 +64,7 @@ class IRSystem:
         new_query_vect = rocchio()
         new_query_tok = rocchio.get_tokens_by_vector(new_query_vect)
         # No tengo claro que hacer con este vector, posiblemente haga un diccionario estático para guardarlo
+        rocchio.save_query(query, new_query_vect)
         return new_query_vect
 
     @staticmethod

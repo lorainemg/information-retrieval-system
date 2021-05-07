@@ -77,15 +77,15 @@ def test_model(queries: Dict[int, str], sim_queries: Dict[int, List[Tuple[int, i
 
 
 def save_test_file(results):
-    json.dump(results, open('../../resources/cran_rel.json', 'w+'))
+    json.dump(results, open('../../resources/cluster/cran_rel.json', 'w+'))
 
 
 def load_test_file():
-    return json.load(open('../../resources/cran_rel.json', 'r+'))
+    return json.load(open('../../resources/cluster/cran_rel.json', 'r+'))
 
 
 def test(mri_model: MRI, evaluation_metric):
-    queries = parse_query('../../resources/cran/cran.qry')
+    queries = parse_query('../../resources/corpus/cran/cran.qry')
     # sim_queries = parse_test_file('../../resources/cran/cranqrel')
     # save_test_file(sim_queries)
     sim_queries = load_test_file()
@@ -94,5 +94,5 @@ def test(mri_model: MRI, evaluation_metric):
 
 
 if __name__ == '__main__':
-    mri = VectorMRI(CranCorpusAnalyzer('../../resources/cran/cran.all.1400'))
+    mri = VectorMRI(CranCorpusAnalyzer('../../resources/corpus/cran/cran.all.1400'))
     test(mri, f1_score)

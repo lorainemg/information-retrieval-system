@@ -42,13 +42,18 @@ def get_synonyms(tokens: List[str]) -> List[List[str]]:
             synonyms.append(syns)
         except IndexError:
             pass
-    return _get_combinations(synonyms)
+    return _get_combinations(synonyms, 5)
 
 
-def _get_combinations(collection):
+def _get_combinations(collection, n_comb):
+    """In collection gives n_comb combinations"""
     def combinate(n, result, final_result):
-        if n == len(collection):
+        nonlocal n_comb
+        if n_comb == 0:
+            return
+        elif n == len(collection):
             final_result.append(result)
+            n_comb -= 1
         else:
             for i in range(len(collection[n])):
                 result[n] = collection[n][i]

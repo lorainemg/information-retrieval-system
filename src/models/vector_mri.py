@@ -9,14 +9,14 @@ class VectorMRI(MRI):
         # parameters in the query weights
         self.a = 0.4  # 0.5
 
-    def ranking_function(self, query: str) -> List[Tuple[int, float]]:
+    def ranking_function(self, query: List[Tuple[int, int]]) -> List[Tuple[int, float]]:
         """
         Main function that returns a sorted ranking of the similarity
         between the corpus and the query.
         format: [doc_id, similarity]
         """
         ranking = []
-        query_vect = dict(self.query_parser(query, self.doc_analyzer.index))
+        query_vect = dict(query)
         for i, doc in enumerate(self.doc_analyzer.documents):
             num = 0
             doc_weights_sqr = 0

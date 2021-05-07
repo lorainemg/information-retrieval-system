@@ -1,7 +1,8 @@
-"""Retroalimentation of the ir system to obtain a better query"""
+"""Feedback of the ir system to obtain a better query"""
 from typing import List, Tuple, Dict
 from corpus import CorpusAnalyzer
 from query import QueryParser
+import json
 
 
 class RocchioAlgorithm:
@@ -28,7 +29,7 @@ class RocchioAlgorithm:
         new_query = term1
         new_query = self._sum_2_vect(new_query, term2)
         new_query = self._sum_2_vect(new_query, term3)
-        return list(new_query.items())
+        return self.reduce_vector_dimension(new_query.items())
 
     def _sum_docs_vect(self, docs):
         sum_docs = {}
@@ -53,3 +54,25 @@ class RocchioAlgorithm:
         """Gets an approximation of the new query tokens"""
         sorted_frq = sorted(query_vect, key=lambda x: x[1], reverse=True)
         return [self.corpus.index[tok_id] for tok_id, _ in sorted_frq[:n]]
+
+    def reduce_vector_dimension(self, query: Tuple[Tuple[int, int]], epsilon=0.05):
+        """Reduces the dimension of the query vector for those components < epsilon"""
+        new_query_vect = dict()
+        for ti, weight in query:
+            if abs(weight) > epsilon:
+                new_query_vect[ti] = weight
+        return list(new_query_vect.items())
+
+    @staticmethod
+    def save_query(query: str, query_vect: List[float]):
+        queries = json.load(open('../resources/queries.json', 'r+'))
+        queries[query] = query_vect
+        json.dump(queries, open('../resources/queries.json', 'w+'))
+
+    @staticmethod
+    def load_query(query: str):
+        queries = json.load(open('../resources/queries.json', 'r+'))
+        try:
+            return queries[query]
+        except KeyError:
+            return None

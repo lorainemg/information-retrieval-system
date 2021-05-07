@@ -7,23 +7,20 @@ from clustering import ClusterManager
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    analyzer = CranCorpusAnalyzer('../resources/cran/cran.all.1400')
-    # mri = VectorMRI(analyzer)
-    # system = IRSystem(mri, analyzer)
-    #
-    # query = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .'
-    # docs = system.make_query(query)
-    # similarity = mri.ranking_function(query)
-    #
-    # relevance = [doc_id for doc_id, freq in similarity[:100] if freq > 10 and freq % 2 == 0]
-    # total_docs = [doc_id for doc_id, _ in similarity[:100]]
-    # new_query = system.user_feedback(query, relevance, total_docs)
-    #
-    # q_vect = query_expansion_with_nltk(QueryParser().parse(query))
-    clus_man = ClusterManager(analyzer)
-    # clus_man.fit_cluster(12)
-    clus_man.load_model()
-    clus_man.get_cluster_samples(1)
+    analyzer = CranCorpusAnalyzer('../resources/corpus/cran/cran.all.1400')
+    # analyzer.save_indexed_document()
+    mri = VectorMRI(analyzer)
+    system = IRSystem(mri, analyzer)
 
+
+    query = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .'
+    docs = system.make_query(query)
+    similarity = mri.ranking_function(QueryParser()(query, analyzer.index))
+
+    relevance = [doc_id for doc_id, freq in similarity[:100] if freq > 10 and freq % 2 == 0]
+    total_docs = [doc_id for doc_id, _ in similarity[:100]]
+    new_query = system.user_feedback(query, relevance, total_docs)
+
+    q_vect = query_expansion_with_nltk(QueryParser().parse(query))
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

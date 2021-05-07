@@ -8,11 +8,15 @@ import pickle
 
 
 class ClusterManager:
-    def __init__(self, corpus: CorpusAnalyzer):
+    def __init__(self, corpus: CorpusAnalyzer, load=False):
         self.corpus = corpus
-        self.X = self.create_doc_vectors()
-        self.cluster_map = pd.DataFrame()
-        self.model = KMeans()
+        # load is used to load a saved model, used for efficiency
+        if load:
+            self.load_model()
+        else:
+            self.X = self.create_doc_vectors()
+            self.cluster_map = pd.DataFrame()
+            self.model = KMeans()
 
     def create_doc_vectors(self):
         """
@@ -62,10 +66,10 @@ class ClusterManager:
 
     def save_model(self):
         """Saves kmeans model and cluster map"""
-        pickle.dump(self.model, open('../resources/kmeans.pkl', 'wb'))
-        pickle.dump(self.cluster_map, open('../resources/cluster_map.pkl', 'wb'))
+        pickle.dump(self.model, open('../resources/cluster/kmeans.pkl', 'wb'))
+        pickle.dump(self.cluster_map, open('../resources/cluster/cluster_map.pkl', 'wb'))
 
     def load_model(self):
         """Loads kmeans model and cluster map"""
-        self.model = pickle.load(open('../resources/kmeans.pkl', 'rb'))
-        self.cluster_map = pickle.load(open('../resources/cluster_map.pkl', 'rb'))
+        self.model = pickle.load(open('../resources/cluster/kmeans.pkl', 'rb'))
+        self.cluster_map = pickle.load(open('../resources/cluster/cluster_map.pkl', 'rb'))

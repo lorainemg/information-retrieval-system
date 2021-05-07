@@ -1,14 +1,15 @@
 """Corpus to read and parse corpus"""
-from typing import Dict, List, Tuple
-from gensim.corpora import Dictionary
+from typing import List, Tuple
+from gensim.corpora import Dictionary, MmCorpus
 import nltk
+import pickle
 
 from tools import Document
 from utils import remove_punctuation, convert_to_lower, tokenize
 
 
 class CorpusAnalyzer:
-    def __init__(self, corpus_path: str):
+    def __init__(self, corpus_path: str, *, load=False, name=''):
         self.corpus_fd = open(corpus_path, 'r')
         # A dictionary of documents where the keys are their identifier
         # and the value its a Document instance
@@ -17,7 +18,11 @@ class CorpusAnalyzer:
         self.index: Dictionary = None
         self.stopwords = set(nltk.corpus.stopwords.words('english'))
         self.parse_documents()
-        self.create_document_index()
+        if not load:
+            self.create_document_index()
+            self.vectors = self.docs2bows()
+        else:
+            self.load_indexed_document()
 
     def parse_documents(self):
         """Parse the documents and fills the documents instance, tokenizing"""
@@ -41,6 +46,17 @@ class CorpusAnalyzer:
         docs = [d.tokens for d in self.documents]
         self.index = Dictionary(docs)
 
+    def save_indexed_document(self, name):
+        self.index.save(f'../resources/indexed_corpus/{name}.idx')
+        # Save the corpus in the Matrix Market format
+        pickle.dump(self.vectors, open(f'../resources/indexed_corpus/{name}_vect.pkl', 'wb'))
+        # MmCorpus.serialize('../resources/indexed_docs.mm', self.vectors)
+
+    def load_indexed_document(self, name):
+        self.index = Dictionary.load(f'../resources/indexed_corpus/{name}.idx')
+        self.vectors = pickle.load(open(f'../resources/indexed_corpus/{name}_vect.pkl', 'rb'))
+        # self.vectors = MmCorpus.load('../resources/indexed_docs.mm')
+
     def id2doc(self, doc_id: int) -> Document:
         """Given a document id returns the documents that matches that id"""
         for doc in self.documents:
@@ -53,19 +69,20 @@ class CorpusAnalyzer:
         Converts all the document (the list of words) into the bag-of-words representation
         format = list of (token_id, token_count) 2-tuples.
         """
-        vectors = [self.index.doc2bow(doc.tokens) for doc in self.documents]
-        # corpora.MmCorpus.serialize('vsm_docs.mm', vectors)  # Save the corpus in the Matrix Market format
-        return vectors
+        return [self.index.doc2bow(doc.tokens) for doc in self.documents]
 
     def doc2bow(self, id):
         """
         Converts the document matching the id into the bag-of-words representation
         format = list of (token_id, token_count) 2-tuples.
         """
+        v1 = self.vectors[id]
         try:
-            return self.index.doc2bow(self.documents[id].tokens)
+            v2 = self.index.doc2bow(self.documents[id].tokens)
         except KeyError:
             return None
+        assert v1 == v2
+        return v1
 
     def token2id(self, token: str):
         return self.index.token2id[token]

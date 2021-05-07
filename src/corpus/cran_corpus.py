@@ -15,10 +15,10 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
         the first line is the title
     """
 
-    def __init__(self, corpus_path):
+    def __init__(self, corpus_path, *, load=False):
         # Regular expresion to extract the id of the document
         self.id_re: Pattern = re.compile(r'\.I (\d+)')
-        CorpusAnalyzer.__init__(self, corpus_path)
+        CorpusAnalyzer.__init__(self, corpus_path, load=load, name='cran')
 
     def parse_documents(self):
         lines = self.corpus_fd.readlines()
@@ -35,9 +35,10 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
             if m is not None:
                 # había un documento actual que se guarda en la lista de documentos
                 if len(current_lines) > 0:
-                    # probablemente haga el preprocesamiento aquí
                     tokens = self.preprocess_text(" ".join(current_lines), stemming=False)
-                    self.documents.append(Document(current_id, tokens, " ".join(current_title)))
+                    title = self.title_preprocessing(current_title)
+                    summary = " ".join(current_lines[:20] + ['...'])
+                    self.documents.append(Document(current_id, tokens, title, summary))
                 current_id = int(m.group(1))
                 current_lines = []
                 getting_words = False
@@ -52,3 +53,14 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
                 current_lines.append(line[:-1])
             elif getting_title:
                 current_title.append(line[:-1])
+
+    def title_preprocessing(self, title: List[str]):
+        title[0] = title[0].capitalize()
+        title[-1] = title[-1][:-1]
+        return " ".join(title)
+
+    def save_indexed_document(self):
+        CorpusAnalyzer.save_indexed_document(self, 'cran')
+
+    def load_indexed_document(self):
+        CorpusAnalyzer.load_indexed_document(self, 'cran')
