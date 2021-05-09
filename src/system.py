@@ -9,7 +9,6 @@ from query_expansion import query_expansion_with_nltk
 from clustering import ClusterManager
 
 # TODO: Save the weights for every document in the collection for more efficiency
-# TODO: Save every query stored with the Rocchio algorithm
 
 
 class IRSystem:
@@ -17,7 +16,6 @@ class IRSystem:
         self.model = model
         self.corpus = corpus
         self.clusterer = ClusterManager(corpus)
-        self.clusterer.fit_cluster(12)
         self.query_parser = QueryParser()
 
     def make_query(self, query: str) -> List[Document]:
@@ -33,7 +31,8 @@ class IRSystem:
 
         # Doing clustering to return related documents with the one with the highest score
         related_docs = self.clusterer.get_cluster_samples(docs[0].id)
-        # docs = set(docs[:20]).union(set(related_docs[:10])).union(docs[20:])
+        related_docs = [self.corpus.id2doc(doc_id) for doc_id in related_docs[:10]]
+        docs = set(docs[:20]).union(set(related_docs[:10])).union(docs[20:])
         # maybe should return the ranking for relevance feedback
         return list(docs)
 

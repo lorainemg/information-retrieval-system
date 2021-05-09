@@ -10,18 +10,18 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
         .I [#] (id of the document)
         .T (title) (can occupy more than one line)
         .A (author) (can occupy more than one line)
-        .B (something about where was published)
+        .B (something about the origin)
         .W (the words of the document) (usually they occupy more than one line)
         the first line is the title
     """
 
-    def __init__(self, corpus_path, *, load=False):
+    def __init__(self, corpus_path, *, name='cran'):
         # Regular expresion to extract the id of the document
         self.id_re: Pattern = re.compile(r'\.I (\d+)')
-        CorpusAnalyzer.__init__(self, corpus_path, load=load, name='cran')
+        CorpusAnalyzer.__init__(self, corpus_path, name=name)
 
-    def parse_documents(self):
-        lines = self.corpus_fd.readlines()
+    def parse_documents(self, corpus_path):
+        corpus_fd = open(corpus_path, 'r')
         # current document that is being built
         current_id: int = None
         current_lines: List[str] = []
@@ -29,7 +29,7 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
         getting_words = False
         current_title: list = []
         getting_title = False
-        for i, line in enumerate(lines):
+        for i, line in enumerate(corpus_fd.readlines()):
             m = self.id_re.match(line)
             # se empieza un nuevo documento
             if m is not None:
@@ -56,11 +56,6 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
 
     def title_preprocessing(self, title: List[str]):
         title[0] = title[0].capitalize()
-        title[-1] = title[-1][:-1]
+        if title[-1][-1] == '.':
+            title[-1] = title[-1][:-1]
         return " ".join(title)
-
-    def save_indexed_document(self):
-        CorpusAnalyzer.save_indexed_document(self, 'cran')
-
-    def load_indexed_document(self):
-        CorpusAnalyzer.load_indexed_document(self, 'cran')

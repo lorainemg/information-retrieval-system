@@ -1,13 +1,15 @@
 from system import IRSystem
-from corpus import CranCorpusAnalyzer
+from corpus import CranCorpusAnalyzer, CisiCorpusAnalyzer, LisaCorpusAnalyzer, NplCorpusAnalyzer
 from models import VectorMRI
 from query_expansion import query_expansion_with_nltk
 from query import QueryParser
-from clustering import ClusterManager
+from pathlib import Path
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    analyzer = CranCorpusAnalyzer('../resources/corpus/cran/cran.all.1400')
+    # analyzer = NplCorpusAnalyzer(Path('../resources/corpus/npl/doc-text'))
+    # analyzer = CranCorpusAnalyzer(Path('../resources/corpus/cran/cran.all.1400'))
+    analyzer = CisiCorpusAnalyzer(Path('../resources/corpus/cisi/CISI.ALL'))
     # analyzer.save_indexed_document()
     mri = VectorMRI(analyzer)
     system = IRSystem(mri, analyzer)

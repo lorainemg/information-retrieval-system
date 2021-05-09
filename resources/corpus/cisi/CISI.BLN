@@ -1,0 +1,86 @@
+#default_ct = 3;
+#q1= #and ('titles', #or ('automatically', 'retrieving', 'problems', 
+                          'concerns', 'descriptive', 
+                          'approximate', 'difficulties',
+			  'content', 'relevance','articles'));
+#q2= #and (#or('data', 'information'), 
+           #or('automatically', 'retrieved','requests',
+               'pertinent', 'response',
+		#not (#or ('articles', 'references')) ) );
+#q3= #and ('information',#or ('science', 'definition'));
+#q4= #or (#and ('image', 'recognition'), 
+          #and ( #or ('printed', 'text'), 
+                 #or ('methods', 'automatically', 'transforming', 
+		      'computer-ready') ) );
+#q5= #and (#or ('training', 'use', 'need', 'systems', 'problems'), 
+	   #or ('special',  'ordinary', 'proper', 
+		'researchers',	'encounter'),
+	   #or ('information', 'management', 'retrieval') );
+#q6= #and (#or ('communication', 'verbal'),
+	   #or ('possibilities', 'word', 'computers', 'humans') );
+#q7= #and ( #or ('systems', 'data-processing',
+                 'coded', 'printing', 'publishing'),
+            #or ('retrieval', 'byproduct', 'papers', 'computer', 'working', 
+	       'planned', 'saving', 'articles') );
+#q8= #and (#or ('languages', 'indexing'), 
+	   #or ('information', 'retrieval', 'science') );
+#q9= #and (#or ('information', 'retrieval', 'system', 'automatic', 
+                'possibilities','inclusion', 'analysis'), 
+	   #or ('grammatical', 'contextual') );
+#q10= #or (#and ('group', 'mathematics'),
+           #and ('mathematics', 
+		 #or ('abstract', 'information', 'retrieval') ) );
+#q11= #and (#or ('need', 'information', 'scientific', 'research'),
+	    #or ('consolidation', 'evaluation', 'retrieval') );
+#q12= #and (#or ('publication', 'printing', 'distribution'),
+	    #or ('methods', 'scientific', 'journals') );
+#q13= #and (#or ('information', 'retrieval', 'dissemination', 'systems'),
+	    #or ('criteria', 'evaluation', 'objective') );
+#q14= #and ('medical', #or ('future', 'automatic')) ;
+#q15= #and (#or ('cost', 'worth', 'industry'),
+            #or ('information', 'retrieval', 'dissemination', 'libraries'),
+	    #or ('systems', 'automated', 'researcher', 'industry') );
+#q16= #and (#or ('information', 'retrieval', 'systems'), 
+	    #or ('future', 'stations', 'remote') );
+#q17= #and (#or ('output', 'obtaining', 'usable', 'customer', 
+                 'volume', 'speed'),
+            #or ('information', 'retrieval'),
+	    #or ('large', 'high', 'customer', 'volume', 'output') );
+#q18= #and(#or ('structures', 'structural', 'formulas', 'drawing', 
+                 'compounds', 'chemical'),
+           #or ('methods', 'automatically',
+		'extended', 'encoding', 'matching'));
+#q19= #and (#or ('matching', 'searching', 'coding'),
+	    #or ('methods', 'machine', 'techniques', 'systems') );
+#q20= #and ('testing', #or ('systems', 'automated', 'information') );
+#q21= #and ('personnel', #or ('need', 'provide', 'information', 'field') );
+#q22= #and ('medical', #or ('automated', 'information', 'field') );
+#q23= #and ( 'libraries',
+             #or ('books', 'use', 'relation', 'systems', 'amount'),
+	     #or ('automated', 'information') );
+#q24= #and(#or ('education', 'training', 'needs', 'programs'),
+           #or ('possibilities', 'personnel', 'providing', 'requirements'),
+	   #or ('information', 'field') );
+#q25= #and ('international', #or ('systems', 'exchange', 'dissemination',
+				  'information') );
+#q26= #and ('cost', #or ('systems', 'automated', 
+			 'information', 'determination'));
+#q27= #and (#or ('computerized', 'systems'), 
+	    #or ('indexing', 'information', 'retrieval'));
+#q28= #and ('chemistry', #or ('computerized', 'systems', 'information') );
+#q29= #and (#or ('specific', 'index', 'advantages'),
+	    #or ('computerized', 'index', 'systems') );
+#q30= #and (#or ('journals', 'periodicals'), 
+	    #or ('information', 'dissemination') );
+#q31= #and (#or ('physical', 'sciences'), #or ('information', 'systems') );
+#q32= #or (#and ('libraries', 
+                 #or ('general', 'computerized', 'mechanized', 'systems')),
+           #and (#or ('problems', 'methods', 'systems', 'indexing'),
+		 #or ('indexing', 'automated', 'author', 'title')) );
+#q33= #and (#or ('distance', 'transmission'),
+	    #or ('retrieval', 'systems', 'automated', 'information') );
+#q34= #and (#or ('coding', 'index', 'methods'), 
+	    #or ('methods', 'computerized', 'systems') );
+#q35= #and ('government', 
+	    #or ('information', 'dissemination', 'agencies', 'projects') );
+#endcoll;

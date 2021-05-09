@@ -34,14 +34,15 @@ class RocchioAlgorithm:
     def _sum_docs_vect(self, docs):
         sum_docs = {}
         for doc_id in docs:
-            for term_id, freq in self.corpus.doc2bow(doc_id):
+            for term_id, freq in self.corpus.doc2bow(doc_id).items():
                 try:
                     sum_docs[term_id] += freq
                 except KeyError:
                     sum_docs[term_id] = freq
         return sum_docs
 
-    def _sum_2_vect(self, doc_vect1: Dict[int, int], doc_vect2: Dict[int, int]) -> Dict[int, int]:
+    @staticmethod
+    def _sum_2_vect(doc_vect1: Dict[int, int], doc_vect2: Dict[int, int]) -> Dict[int, int]:
         # note: the result is stored in doc_vect1 for efficiency
         for ti, freq in doc_vect2.items():
             try:
@@ -55,7 +56,8 @@ class RocchioAlgorithm:
         sorted_frq = sorted(query_vect, key=lambda x: x[1], reverse=True)
         return [self.corpus.index[tok_id] for tok_id, _ in sorted_frq[:n]]
 
-    def reduce_vector_dimension(self, query: Tuple[Tuple[int, int]], epsilon=0.05):
+    @staticmethod
+    def reduce_vector_dimension(query: Tuple[Tuple[int, int]], epsilon: int = 0.05):
         """Reduces the dimension of the query vector for those components < epsilon"""
         new_query_vect = dict()
         for ti, weight in query:

@@ -8,12 +8,12 @@ import pickle
 
 
 class ClusterManager:
-    def __init__(self, corpus: CorpusAnalyzer, load=False):
+    def __init__(self, corpus: CorpusAnalyzer):
         self.corpus = corpus
         # load is used to load a saved model, used for efficiency
-        if load:
+        try:
             self.load_model()
-        else:
+        except FileNotFoundError or FileExistsError:
             self.X = self.create_doc_vectors()
             self.cluster_map = pd.DataFrame()
             self.model = KMeans()
@@ -32,11 +32,11 @@ class ClusterManager:
         """Gets the vector of a single document"""
         bow = self.corpus.doc2bow(doc_id)
         vector = np.zeros(len(self.corpus.index))
-        for term_id, freq in bow:
+        for term_id, freq in bow.items():
             vector[term_id] = freq
         return vector
 
-    def elbow_method(self):
+    def elbow_method(self) -> int:
         """Gets the optimus k by the elbow method"""
         # visualizer = KElbowVisualizer(self.model, k=(4, 20), metric='calinski_harabasz')
         visualizer = KElbowVisualizer(KMeans(), k=(4, 20))
@@ -53,6 +53,7 @@ class ClusterManager:
         km = self.model.fit(self.X)
         self.cluster_map['doc_id'] = list(range(self.X.shape[0]))
         self.cluster_map['cluster'] = km.labels_
+        self.save_model()
 
     def predict_cluster(self, doc_id):
         """Predicts the cluster of a given doc_id"""
@@ -66,10 +67,10 @@ class ClusterManager:
 
     def save_model(self):
         """Saves kmeans model and cluster map"""
-        pickle.dump(self.model, open('../resources/cluster/kmeans.pkl', 'wb'))
-        pickle.dump(self.cluster_map, open('../resources/cluster/cluster_map.pkl', 'wb'))
+        pickle.dump(self.model, open(f'../resources/cluster/{self.corpus.name}_kmeans.pkl', 'wb'))
+        pickle.dump(self.cluster_map, open(f'../resources/cluster/{self.corpus.name}_cluster_map.pkl', 'wb'))
 
     def load_model(self):
         """Loads kmeans model and cluster map"""
-        self.model = pickle.load(open('../resources/cluster/kmeans.pkl', 'rb'))
-        self.cluster_map = pickle.load(open('../resources/cluster/cluster_map.pkl', 'rb'))
+        self.model = pickle.load(open(f'../resources/cluster/{self.corpus.name}_kmeans.pkl', 'rb'))
+        self.cluster_map = pickle.load(open(f'../resources/cluster/{self.corpus.name}_cluster_map.pkl', 'rb'))

@@ -1,0 +1,55 @@
+README
+
+  The files in this directory contain the LISA collection as provided by Peter
+Willett of Sheffield University.  They are NOT TO BE SOLD but are being provided
+to support research investigations.  For ease of manipulation, the document
+collection is broken up into a number of files that should be concatenated
+together to yield the full set.
+  The LISA collection was sent in messages with headers like
+those at the bottom of this file.
+  There are 6004 documents and 35 queries with relevance
+judgements. - Ed Fox
+
+The Library and Information Science Abstracts database is
+   Copyright (c) 1982 Library Association
+
+-------------more information about collection, taken from letter----------
+
+Comments from a 28 June 1988 letter from Dr. Peter Willett,
+Snior Lecturer in Information Science, Department of Information Studies,
+The University of Sheffield, Sheffield S10 2TN, ENGLAND
+Telephone: (0742) 768555, x. 6012
+Fax: (0742) 739826
+Email: LI1PBW%PRIMEA.SHEFFIELD.AC.UK@CUNYVM.CUNY.EDU
+
+"I am enclosing a copy of a test collection which we have developed here based 
+on the 1982 Library and Information Science Abstracts database (6004 documents
+for which we have extracted just the title and abstract fields).  There are 35
+natural language queries which were obtained from students on our MSc course in
+1983; these were searched for in all of the printed versions of LISA (not quite
+exhaustively but the student in question did spend about 6 weeks doing nothing 
+else but sitting in the library surrounded by LISA issues!).  These manual 
+searches were supplemented by extensive online searches; I would guess that 
+probably 80% of the relevant documents have been identified.
+
+I also enclose a copy of the correspondence which I had with Nick Moore at the
+Library Association, who provided the original data.  Is this acceptable to you
+for your copyright purposes - I am assuming that the disc will have some 
+statement about not selling the data etc etc."
+
+------------sample msg from person sending files-----------
+Date:     Thu, 27 Oct 88 12:21:28 GMT
+From:     LI1IGH@PRIMEA.SHEFFIELD.AC.UK
+To:       foxea@VTCC1
+
+Dr. Fox,
+
+Hopefully, you will be receiving the Sheffield LISA test collection
+along with this note. I don't know what went wrong with the version we
+sent on tape; this one looked ok when it left here.
+
+Please let me, or Peter Willett, know if anything unexpected happens to it
+in transit..
+                            Steve Wade
+                            (Research Assistant)
+
