@@ -28,7 +28,7 @@ class IRSystem:
         query_vect = self.query_parser(query, self.corpus.index)
 
         # Tries to find another vector with the feedback model
-        new_query_vect = RocchioAlgorithm.load_query(query)
+        new_query_vect = self._load_query(query)
         query_vect = query_vect if new_query_vect is None else new_query_vect
 
         ranking = self.model.ranking_function(query_vect)
@@ -42,6 +42,13 @@ class IRSystem:
         # maybe should return the ranking for relevance feedback
         return list(docs)
 
+    def _load_query(self, query: str):
+        """Tries to find another vector for the query with the feedback model"""
+        try:
+            return RocchioAlgorithm.load_query(query, self.corpus.name)
+        except FileNotFoundError:
+            return None
+
     def user_feedback(self, query: str, relevant_docs: List[int], total_docs: List[int]):
         """
         Feedback if the user helped
@@ -53,9 +60,7 @@ class IRSystem:
         non_relevant_docs = [doc_id for doc_id in total_docs if doc_id not in relevant_docs]
         rocchio = RocchioAlgorithm(query, self.corpus, relevant_docs, non_relevant_docs)
         new_query_vect = rocchio()
-        new_query_tok = rocchio.get_tokens_by_vector(new_query_vect)
-        # No tengo claro que hacer con este vector, posiblemente haga un diccionario estático para guardarlo
-        rocchio.save_query(query, new_query_vect)
+        rocchio.save_query(query, new_query_vect, self.corpus.name)
         return new_query_vect
 
     def pseudo_feedback(self, query: str, ranking: List[Tuple[int, float]], k=10):
@@ -67,9 +72,7 @@ class IRSystem:
         non_relevant_docs = [doc_id for doc_id, _ in ranking[k:]]
         rocchio = RocchioAlgorithm(query, self.corpus, relevant_docs, non_relevant_docs)
         new_query_vect = rocchio()
-        new_query_tok = rocchio.get_tokens_by_vector(new_query_vect)
-        # No tengo claro que hacer con este vector, posiblemente haga un diccionario estático para guardarlo
-        rocchio.save_query(query, new_query_vect)
+        rocchio.save_query(query, new_query_vect, self.corpus.name)
         return new_query_vect
 
     @staticmethod

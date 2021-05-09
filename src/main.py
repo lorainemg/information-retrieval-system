@@ -1,5 +1,5 @@
 from system import IRSystem
-from corpus import CranCorpusAnalyzer, CisiCorpusAnalyzer, LisaCorpusAnalyzer, NplCorpusAnalyzer, UnionCorpusAnalyzer
+import corpus
 from models import VectorMRI
 from query_expansion import query_expansion_with_nltk
 from query import QueryParser
@@ -7,10 +7,11 @@ from pathlib import Path
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    # analyzer = NplCorpusAnalyzer(Path('../resources/corpus/npl/doc-text'))
-    # analyzer = CranCorpusAnalyzer(Path('../resources/corpus/cran/cran.all.1400'))
-    # analyzer = CisiCorpusAnalyzer(Path('../resources/corpus/cisi/CISI.ALL'))
-    analyzer = UnionCorpusAnalyzer(Path('../resources/corpus'))
+    analyzer = corpus.LisaCorpusAnalyzer(Path('../resources/corpus/lisa'))
+    # analyzer = corpus.NplCorpusAnalyzer(Path('../resources/corpus/npl/doc-text'))
+    # analyzer = corpus.CranCorpusAnalyzer(Path('../resources/corpus/cran/cran.all.1400'))
+    # analyzer = corpus.CisiCorpusAnalyzer(Path('../resources/corpus/cisi/CISI.ALL'))
+    # analyzer = corpus.UnionCorpusAnalyzer(Path('../resources/corpus'))
     mri = VectorMRI(analyzer)
     system = IRSystem(mri, analyzer)
 

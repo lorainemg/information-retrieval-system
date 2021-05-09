@@ -8,7 +8,7 @@ import json
 class RocchioAlgorithm:
     def __init__(self, query: str, corpus: CorpusAnalyzer, relevant_docs: List[int], non_relevant_docs: List[int]):
         """
-        Initializes the rocchio algorithm, relevance is a list of tuples (doc_id, relevance)
+        Initializes the rocchio algorithm
         """
         self.corpus = corpus
         self.rel_docs = relevant_docs
@@ -66,14 +66,17 @@ class RocchioAlgorithm:
         return list(new_query_vect.items())
 
     @staticmethod
-    def save_query(query: str, query_vect: List[float]):
-        queries = json.load(open('../resources/queries.json', 'r+'))
+    def save_query(query: str, query_vect: List[float], name='misc'):
+        try:
+            queries = json.load(open(f'../resources/queries/{name}_queries.json', 'r+'))
+        except FileNotFoundError:
+            queries = {}
         queries[query] = query_vect
-        json.dump(queries, open('../resources/queries.json', 'w+'))
+        json.dump(queries, open(f'../resources/queries/{name}_queries.json', 'w+'))
 
     @staticmethod
-    def load_query(query: str):
-        queries = json.load(open('../resources/queries.json', 'r+'))
+    def load_query(query: str, name='misc'):
+        queries = json.load(open(f'../resources/queries/{name}_queries.json', 'r+'))
         try:
             return queries[query]
         except KeyError:
