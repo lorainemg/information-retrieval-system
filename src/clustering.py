@@ -44,11 +44,20 @@ class ClusterManager:
         visualizer.show()
         return visualizer.elbow_value_
 
-    def fit_cluster(self, k: int):
+    def fit_cluster(self, k: int, *, load=True):
         """
         Does the training of k-means.
         Also stores all the documents clusters.
         """
+        if not load:
+            self.fit_cluster(k)
+            return
+        try:
+            self.load_model()
+        except FileNotFoundError or FileExistsError:
+            self._fit_cluster(k)
+
+    def _fit_cluster(self, k: int):
         self.model = KMeans(n_clusters=k)
         km = self.model.fit(self.X)
         self.cluster_map['doc_id'] = list(range(self.X.shape[0]))

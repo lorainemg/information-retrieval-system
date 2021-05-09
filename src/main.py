@@ -1,5 +1,5 @@
 from system import IRSystem
-from corpus import CranCorpusAnalyzer, CisiCorpusAnalyzer, LisaCorpusAnalyzer, NplCorpusAnalyzer
+from corpus import CranCorpusAnalyzer, CisiCorpusAnalyzer, LisaCorpusAnalyzer, NplCorpusAnalyzer, UnionCorpusAnalyzer
 from models import VectorMRI
 from query_expansion import query_expansion_with_nltk
 from query import QueryParser
@@ -9,8 +9,8 @@ from pathlib import Path
 if __name__ == '__main__':
     # analyzer = NplCorpusAnalyzer(Path('../resources/corpus/npl/doc-text'))
     # analyzer = CranCorpusAnalyzer(Path('../resources/corpus/cran/cran.all.1400'))
-    analyzer = CisiCorpusAnalyzer(Path('../resources/corpus/cisi/CISI.ALL'))
-    # analyzer.save_indexed_document()
+    # analyzer = CisiCorpusAnalyzer(Path('../resources/corpus/cisi/CISI.ALL'))
+    analyzer = UnionCorpusAnalyzer(Path('../resources/corpus'))
     mri = VectorMRI(analyzer)
     system = IRSystem(mri, analyzer)
 

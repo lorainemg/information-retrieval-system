@@ -6,6 +6,7 @@ import re
 
 
 class NplCorpusAnalyzer(CorpusAnalyzer):
+    """Corpus analyzer for the npl dataset"""
     def __init__(self, corpus_path: Path, *, name='npl'):
         super().__init__(corpus_path, name=name)
 

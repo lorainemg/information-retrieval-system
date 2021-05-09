@@ -7,6 +7,7 @@ import re
 
 
 class LisaCorpusAnalyzer(CorpusAnalyzer):
+    """Corpus analyzer for the lisa dataset"""
     def __init__(self, corpus_path: Path, *, name='lisa'):
         self.id_re = re.compile('Document\s+(\d+)')
         CorpusAnalyzer.__init__(self, corpus_path, name=name)

@@ -9,8 +9,7 @@ class Document:
         self.summary = summary
 
     def __str__(self):
-        return f'{self.id}: {" ".join(self.tokens)}'
+        return f'{self.id}: {self.summary}'
 
     def __repr__(self):
         return str(self)
-

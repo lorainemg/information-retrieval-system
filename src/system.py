@@ -15,7 +15,12 @@ class IRSystem:
     def __init__(self, model: MRI, corpus: CorpusAnalyzer):
         self.model = model
         self.corpus = corpus
-        self.clusterer = ClusterManager(corpus)
+        if corpus.name != 'union':
+            # with the union of the datasets, the cluster algorithm cannot run
+            self.clusterer = ClusterManager(corpus)
+            self.clusterer.fit_cluster(8)
+        else:
+            self.clusterer = None
         self.query_parser = QueryParser()
 
     def make_query(self, query: str) -> List[Document]:
@@ -30,9 +35,10 @@ class IRSystem:
         docs = self.model.get_similarity_docs(ranking)
 
         # Doing clustering to return related documents with the one with the highest score
-        related_docs = self.clusterer.get_cluster_samples(docs[0].id)
-        related_docs = [self.corpus.id2doc(doc_id) for doc_id in related_docs[:10]]
-        docs = set(docs[:20]).union(set(related_docs[:10])).union(docs[20:])
+        if self.clusterer is not None:
+            related_docs = self.clusterer.get_cluster_samples(docs[0].id)
+            related_docs = [self.corpus.id2doc(doc_id) for doc_id in related_docs[:10]]
+            docs = set(docs[:20]).union(set(related_docs[:10])).union(docs[20:])
         # maybe should return the ranking for relevance feedback
         return list(docs)
 

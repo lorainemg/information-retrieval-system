@@ -4,6 +4,7 @@ from gensim.corpora import Dictionary
 from pathlib import Path
 import nltk
 import pickle
+import json
 
 from tools import Document
 from utils import remove_punctuation, convert_to_lower, tokenize
@@ -18,10 +19,10 @@ class CorpusAnalyzer:
         self.index: Dictionary = None
         self.name = name
         self.stopwords = set(nltk.corpus.stopwords.words('english'))
-        self.parse_documents(corpus_path)
         try:
             self.load_indexed_document()
         except FileNotFoundError or FileExistsError:
+            self.parse_documents(corpus_path)
             self.create_document_index()
             self.vectors = self.docs2bows()
             self.save_indexed_document()
@@ -55,11 +56,13 @@ class CorpusAnalyzer:
         self.index.save(f'../resources/indexed_corpus/{self.name}/index.idx')
         # Save the corpus in the Matrix Market format
         pickle.dump(self.vectors, open(f'../resources/indexed_corpus/{self.name}/docs_vect.pkl', 'wb'))
+        pickle.dump(self.documents, open(f'../resources/indexed_corpus/{self.name}/docs.pkl', 'wb'))
         # MmCorpus.serialize('../resources/indexed_docs.mm', self.vectors)
 
     def load_indexed_document(self):
         self.index = Dictionary.load(f'../resources/indexed_corpus/{self.name}/index.idx')
         self.vectors = pickle.load(open(f'../resources/indexed_corpus/{self.name}/docs_vect.pkl', 'rb'))
+        self.documents = pickle.load(open(f'../resources/indexed_corpus/{self.name}/docs.pkl', 'rb'))
         # self.vectors = MmCorpus.load('../resources/indexed_docs.mm')
 
     def id2doc(self, doc_id: int) -> Document:
