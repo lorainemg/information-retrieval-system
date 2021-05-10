@@ -7,14 +7,24 @@ from pathlib import Path
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    analyzer = corpus.LisaCorpusAnalyzer(Path('../resources/corpus/lisa'))
-    # analyzer = corpus.NplCorpusAnalyzer(Path('../resources/corpus/npl/doc-text'))
-    # analyzer = corpus.CranCorpusAnalyzer(Path('../resources/corpus/cran/cran.all.1400'))
-    # analyzer = corpus.CisiCorpusAnalyzer(Path('../resources/corpus/cisi/CISI.ALL'))
-    # analyzer = corpus.UnionCorpusAnalyzer(Path('../resources/corpus'))
-    mri = VectorMRI(analyzer)
-    system = IRSystem(mri, analyzer)
+    lisa_analyzer = corpus.LisaCorpusAnalyzer(Path('../resources/corpus/lisa'))
+    lisa_system = IRSystem(VectorMRI(lisa_analyzer))
 
+    # npl_analyzer = corpus.NplCorpusAnalyzer(Path('../resources/corpus/npl/doc-text'))
+    # npl_system = IRSystem(VectorMRI(npl_analyzer))
+    #
+    # cran_analyzer = corpus.CranCorpusAnalyzer(Path('../resources/corpus/cran/cran.all.1400'))
+    # cran_system = IRSystem(VectorMRI(npl_analyzer))
+    #
+    # cisi_analyzer = corpus.CisiCorpusAnalyzer(Path('../resources/corpus/cisi/CISI.ALL'))
+    # cisi_system = IRSystem(VectorMRI(cisi_analyzer))
+    #
+    # all_analyzer = corpus.UnionCorpusAnalyzer(Path('../resources/corpus'))
+    # all_system = IRSystem(VectorMRI(all_analyzer))
+
+    system = lisa_system
+    mri = system.model
+    analyzer = system.corpus
 
     query = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .'
     docs = system.make_query(query)

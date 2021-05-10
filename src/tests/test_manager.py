@@ -40,7 +40,7 @@ class TestFileManager:
         for query_id, text in self.queries.items():
             # IDs of the relevant docs
             try:
-                doc_ids_rel = self.similarity_queries[query_id].keys()
+                doc_ids_rel = [int(doc_id) for doc_id in self.similarity_queries[query_id].keys()]
             except KeyError:
                 # the queries in the test and in the file doesn't have the same length
                 break

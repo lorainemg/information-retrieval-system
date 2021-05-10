@@ -3,6 +3,7 @@ from tests.test_manager import TestFileManager
 from pathlib import Path
 import re
 
+
 class LisaTestManager(TestFileManager):
     def __init__(self, query_path: Path, relation_path: Path, *, name='lisa'):
         super().__init__(query_path, relation_path, name=name)

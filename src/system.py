@@ -12,12 +12,12 @@ from clustering import ClusterManager
 
 
 class IRSystem:
-    def __init__(self, model: MRI, corpus: CorpusAnalyzer):
+    def __init__(self, model: MRI):
         self.model = model
-        self.corpus = corpus
-        if corpus.name != 'union':
+        self.corpus = model.doc_analyzer
+        if self.corpus.name != 'union':
             # with the union of the datasets, the cluster algorithm cannot run
-            self.clusterer = ClusterManager(corpus)
+            self.clusterer = ClusterManager(self.corpus)
             self.clusterer.fit_cluster(8)
         else:
             self.clusterer = None
