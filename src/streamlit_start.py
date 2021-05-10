@@ -17,9 +17,9 @@ from tools import Document
 
 def create_system() -> IRSystem:
     print("Creating System")
-    analyzer = CranCorpusAnalyzer('./resources/cran/cran.all.1400')
+    analyzer = CranCorpusAnalyzer('../resources/cran/cran.all.1400')
     mri = VectorMRI(analyzer)
-    return IRSystem(mri, analyzer)
+    return IRSystem(mri)
 
 @cache(show_spinner= False, suppress_st_warning= True, persist= True)
 def get_query_result(query: str) -> List[Document]:
@@ -47,6 +47,7 @@ state = visual.session_state.get(system=None, feedback={}, query=None)
 if state.system == None:
     state.system = create_system()
 
+print('System created')
 system: IRSystem = state.system
 feedback: Dict[str, List[int]] = state.feedback
 
