@@ -1,7 +1,10 @@
 from corpus import CorpusAnalyzer
 from clustering import ClusterManager
 from typing import Dict
+from pathlib import Path
 import numpy as np
+import json
+import os
 
 
 class DocumentRecommender:
@@ -12,10 +15,11 @@ class DocumentRecommender:
         :param ratings: ratings of the documents consisting in: [doc_id, rating]
         (usually a rating of 0 or 1 if the user found the document interesting)
         """
-        self.corpus = clusterer.corpus
-        self.clusterer = clusterer
+        self.corpus: CorpusAnalyzer = clusterer.corpus
+        self.clusterer: ClusterManager = clusterer
         if ratings is None:
-            self.ratings = {}
+            # the ratings are obtained in the ratings folder
+            self.load_ratings()
         else:
             self.ratings = ratings
 
@@ -53,10 +57,12 @@ class DocumentRecommender:
     def add_rating(self, doc_id: int, rating: int):
         """Adds a rating for the doc_id in the ratings list"""
         self.ratings[doc_id] = rating
+        self.save_ratings()
 
     def add_ratings(self, ratings: Dict[int, int]):
         """Adds the rating for different documents"""
         self.ratings.update(ratings)
+        self.save_ratings()
 
     def doc_deviation(self, doc_id: int):
         """Mean deviation of a document"""
@@ -71,7 +77,10 @@ class DocumentRecommender:
 
     def expected_rating(self, doc_id: int):
         """Predicts the rating of an unseen document"""
-        documents = self.clusterer.get_cluster_samples(doc_id)
+        if self.clusterer is not None:
+            documents = self.clusterer.get_cluster_samples(doc_id)
+        else:
+            documents = [doc_id for doc_id in range(len(self.corpus.documents))]
         rated_documents = [doc_id for doc_id in documents if doc_id in self.ratings]
         numerator = sum(map(lambda d: self.similarity(doc_id, d)*self.predictor_baseline(d), rated_documents))
         denominator = sum(map(lambda d: self.similarity(doc_id, d), rated_documents))
@@ -88,3 +97,15 @@ class DocumentRecommender:
                 predicted_rating = self.expected_rating(doc_id)
                 doc_ratings[doc_id] = predicted_rating
         return sorted(doc_ratings, key=lambda x: doc_ratings[x])[:k]
+
+    def load_ratings(self):
+        try:
+            self.ratings = json.load(open(Path('../resources/ratings/ratings.json'), 'r'))
+        except FileNotFoundError:
+            self.ratings = {}
+
+    def save_ratings(self):
+        try:
+            json.dump(self.ratings, open(Path('../resources/ratings/ratings.json'), 'w'))
+        except FileNotFoundError:
+            json.dump(self.ratings, open(Path('../resources/ratings/ratings.json'), 'x'))

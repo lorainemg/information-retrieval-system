@@ -1,7 +1,7 @@
 from models.model import MRI
 from typing import Dict, List, Tuple
 from utils import tf, idf
-import numpy as np
+import math
 
 
 class VectorMRI(MRI):
@@ -29,7 +29,7 @@ class VectorMRI(MRI):
                 doc_weights_sqr += w_doc ** 2
                 query_weights_sqr += w_query ** 2
             try:
-                sim = num / np.sqrt(doc_weights_sqr) * np.sqrt(query_weights_sqr)
+                sim = num / (math.sqrt(doc_weights_sqr) * math.sqrt(query_weights_sqr))
             except ZeroDivisionError:
                 sim = 0
             ranking.append((doc.id, sim))

@@ -3,6 +3,7 @@ from typing import List, Tuple, Dict
 from corpus import CorpusAnalyzer
 from query import QueryParser
 import json
+import os
 
 
 class RocchioAlgorithm:

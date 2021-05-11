@@ -7,6 +7,7 @@ from typing import List, Tuple, Iterable
 from tools import Document
 from query_expansion import query_expansion
 from clustering import ClusterManager
+from document_recommendation import DocumentRecommender
 
 # TODO: Save the weights for every document in the collection for more efficiency
 
@@ -22,6 +23,7 @@ class IRSystem:
         else:
             self.clusterer = None
         self.query_parser = QueryParser()
+        self.document_recommender = DocumentRecommender(self.clusterer)
 
     def make_query(self, query: str) -> List[Document]:
         """Makes a query with the loaded corpus and returns the documents sorted for relevancy"""
@@ -39,8 +41,13 @@ class IRSystem:
             related_docs = self.clusterer.get_cluster_samples(docs[0].id)
             related_docs = [self.corpus.id2doc(doc_id) for doc_id in related_docs[:10]]
             docs = set(docs[:20]).union(set(related_docs[:10])).union(docs[20:])
+        docs = list(docs)
+
+        # The most similar doc to the query is saved as relevant to the user for the document recommender
+        self.document_recommender.add_rating(docs[0].id, 1)
+
         # maybe should return the ranking for relevance feedback
-        return list(docs)
+        return docs
 
     def _load_query(self, query: str):
         """Tries to find another vector for the query with the feedback model"""
@@ -58,6 +65,12 @@ class IRSystem:
         :return: The vector of the new query
         """
         non_relevant_docs = [doc_id for doc_id in total_docs if doc_id not in relevant_docs]
+
+        # For the recommender system: relevants docs are stored as interesting, non relevants as none
+        self.document_recommender.add_ratings({doc_id: 1 for doc_id in relevant_docs})
+        self.document_recommender.add_ratings({doc_id: 0 for doc_id in non_relevant_docs})
+
+        # Execution of the Rocchio Algorithm
         rocchio = RocchioAlgorithm(query, self.corpus, relevant_docs, non_relevant_docs)
         new_query_vect = rocchio()
         rocchio.save_query(query, new_query_vect, self.corpus.name)
@@ -70,13 +83,29 @@ class IRSystem:
         """
         relevant_docs = [doc_id for doc_id, _ in ranking[:k]]
         non_relevant_docs = [doc_id for doc_id, _ in ranking[k:]]
+
+        # For the recommender system: relevants docs are stored as interesting, non relevants as none
+        self.document_recommender.add_ratings({doc_id: 1 for doc_id in relevant_docs})
+        self.document_recommender.add_ratings({doc_id: 0 for doc_id in non_relevant_docs})
+
+        # Execution of the Rocchio Algorithm
         rocchio = RocchioAlgorithm(query, self.corpus, relevant_docs, non_relevant_docs)
         new_query_vect = rocchio()
         rocchio.save_query(query, new_query_vect, self.corpus.name)
         return new_query_vect
 
-    @staticmethod
-    def global_query_expansion(query: str):
+    def global_query_expansion(self, query: str) -> List[str]:
         """Does global query expansion, returning a list of possible queries related with the original one"""
         query_tokens = QueryParser().parse(query)
-        return query_expansion(query_tokens)
+        return query_expansion(query_tokens, self.corpus)
+
+    def get_recommended_documents(self) -> List[Document]:
+        """
+        Returns the 5 more interesting useen documents for the user
+        according to the recommendation system
+        """
+        # If there is no rated document return zero
+        if len(self.document_recommender.ratings) == 0:
+            return []
+        docs_id = self.document_recommender.recommend_documents(5)
+        return [self.corpus.id2doc(doc_id) for doc_id in docs_id]

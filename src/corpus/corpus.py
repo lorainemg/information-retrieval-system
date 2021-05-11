@@ -57,13 +57,13 @@ class CorpusAnalyzer:
         # Save the corpus in the Matrix Market format
         pickle.dump(self.vectors, open(f'../resources/indexed_corpus/{self.name}/docs_vect.pkl', 'wb'))
         pickle.dump(self.documents, open(f'../resources/indexed_corpus/{self.name}/docs.pkl', 'wb'))
-        # MmCorpus.serialize('../resources/indexed_docs.mm', self.vectors)
+        # MmCorpus.serialize('../ratings/indexed_docs.mm', self.vectors)
 
     def load_indexed_document(self):
         self.index = Dictionary.load(f'../resources/indexed_corpus/{self.name}/index.idx')
         self.vectors = pickle.load(open(f'../resources/indexed_corpus/{self.name}/docs_vect.pkl', 'rb'))
         self.documents = pickle.load(open(f'../resources/indexed_corpus/{self.name}/docs.pkl', 'rb'))
-        # self.vectors = MmCorpus.load('../resources/indexed_docs.mm')
+        # self.vectors = MmCorpus.load('../ratings/indexed_docs.mm')
 
     def id2doc(self, doc_id: int) -> Document:
         """Given a document id returns the documents that matches that id"""
