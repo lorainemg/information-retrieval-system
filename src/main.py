@@ -1,39 +1,50 @@
 from system import IRSystem
 import corpus
 from models import VectorMRI
-from query_expansion import query_expansion_with_nltk
+from query_expansion import query_expansion
 from query import QueryParser
 from pathlib import Path
+from clustering import ClusterManager
+from document_recommendation import DocumentRecommender
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     lisa_analyzer = corpus.LisaCorpusAnalyzer(Path('../resources/corpus/lisa'))
     lisa_system = IRSystem(VectorMRI(lisa_analyzer))
 
-    # npl_analyzer = corpus.NplCorpusAnalyzer(Path('../resources/corpus/npl/doc-text'))
-    # npl_system = IRSystem(VectorMRI(npl_analyzer))
     #
     # cran_analyzer = corpus.CranCorpusAnalyzer(Path('../resources/corpus/cran/cran.all.1400'))
-    # cran_system = IRSystem(VectorMRI(npl_analyzer))
+    # cran_system = IRSystem(VectorMRI(cran_analyzer))
     #
     # cisi_analyzer = corpus.CisiCorpusAnalyzer(Path('../resources/corpus/cisi/CISI.ALL'))
     # cisi_system = IRSystem(VectorMRI(cisi_analyzer))
     #
+    # npl_analyzer = corpus.NplCorpusAnalyzer(Path('../resources/corpus/npl/doc-text'))
+    # npl_system = IRSystem(VectorMRI(npl_analyzer))
+    #
     # all_analyzer = corpus.UnionCorpusAnalyzer(Path('../resources/corpus'))
     # all_system = IRSystem(VectorMRI(all_analyzer))
 
-    system = lisa_system
-    mri = system.model
-    analyzer = system.corpus
-
+    # system = lisa_system
+    # mri = system.model
+    # analyzer = system.corpus
+    #
     query = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .'
-    docs = system.make_query(query)
-    similarity = mri.ranking_function(QueryParser()(query, analyzer.index))
+    # docs = system.make_query(query)
+    # similarity = mri.ranking_function(QueryParser()(query, analyzer.index))
+    #
+    # relevance = [doc_id for doc_id, freq in similarity[:100] if freq > 10 and freq % 2 == 0]
+    # total_docs = [doc_id for doc_id, _ in similarity[:100]]
+    # new_query = system.user_feedback(query, relevance, total_docs)
+    #
+    q_vect = query_expansion(QueryParser().parse(query), lisa_analyzer)
+    print(q_vect)
 
-    relevance = [doc_id for doc_id, freq in similarity[:100] if freq > 10 and freq % 2 == 0]
-    total_docs = [doc_id for doc_id, _ in similarity[:100]]
-    new_query = system.user_feedback(query, relevance, total_docs)
+    # doc_rec = DocumentRecommender(lisa_system.clusterer, {1: 1, 4: 1, 10: 1, 12: 1, 2: 0, 11: 0})
+    # docs = doc_rec.recommend_documents()
+    # for doc_id in docs:
+    #     print(lisa_analyzer.id2doc(doc_id))
 
-    q_vect = query_expansion_with_nltk(QueryParser().parse(query))
+
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

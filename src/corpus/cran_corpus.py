@@ -49,6 +49,8 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
                 getting_words = True
             elif line.startswith('.A'):
                 getting_title = False
+            elif line.startswith('.X'):
+                getting_words = False
             elif getting_words:
                 current_lines.append(line[:-1])
             elif getting_title:

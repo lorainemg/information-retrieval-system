@@ -1,6 +1,7 @@
 from models.model import MRI
 from typing import Dict, List, Tuple
-import math
+from utils import tf, idf
+import numpy as np
 
 
 class VectorMRI(MRI):
@@ -28,7 +29,7 @@ class VectorMRI(MRI):
                 doc_weights_sqr += w_doc ** 2
                 query_weights_sqr += w_query ** 2
             try:
-                sim = num / math.sqrt(doc_weights_sqr) * math.sqrt(query_weights_sqr)
+                sim = num / np.sqrt(doc_weights_sqr) * np.sqrt(query_weights_sqr)
             except ZeroDivisionError:
                 sim = 0
             ranking.append((doc.id, sim))
@@ -46,11 +47,7 @@ class VectorMRI(MRI):
         return self.tf(ti, dj) * self.idf(ti)
 
     def tf(self, ti: int, dj: int) -> float:
-        freq = self.doc_analyzer.get_frequency(ti, dj)
-        max_freq_tok, max_freq = self.doc_analyzer.get_max_frequency(dj)
-        return freq / max_freq
+        return tf(self.doc_analyzer, ti, dj)
 
     def idf(self, ti: int) -> float:
-        N = len(self.doc_analyzer.documents)
-        ni = self.doc_analyzer.index.dfs[ti]
-        return math.log2(N / ni)
+        return idf(self.doc_analyzer, ti)

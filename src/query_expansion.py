@@ -1,24 +1,24 @@
 """Module to implement the query expansion"""
 from nltk.corpus import wordnet as wn
-from typing import List
-
+from typing import List, Dict
 from nltk.corpus import words
 from nltk.metrics.distance import edit_distance
-from nltk.util import ngrams
+from utils import idf
 
 
-def query_expansion_with_nltk(query: List[str]):
+def query_expansion(query: List[str], doc_analyzer, mode='hypernym') -> List[str]:
     """
-    Does query expansion with nltk.
-    Performs spell checking and returns synonyms
+    Does query expansion using WordNet hypernyms and synonyms.
+    :param query: list of tokenized query terms
+    :param mode: choose mode: hypernym for hypernym based relaxation, 'synonym' for synonym based relaxation
+    :return: list containing a list of alternate tokenized queries
     """
     tokens = spell_checking(query)
-    synonyms = get_synonyms(query)
-    synonyms.insert(0, tokens)
-    return synonyms
+    new_tokens = get_relaxed_query(query, doc_analyzer, mode)
+    return [tokens] + new_tokens
 
 
-def spell_checking(tokens: List[str]) -> List[str]:
+def spell_checking(tokens: List[str]) -> str:
     """Returns the correct spelling of every word in the list of tokens"""
     correct_words = words.words()
     correct_spelling = []
@@ -26,23 +26,54 @@ def spell_checking(tokens: List[str]) -> List[str]:
         temp = [(edit_distance(token, w), w) for w in correct_words if w[0] == token[0]]
         word = min(temp, key=lambda x: x[0])[1]
         correct_spelling.append(word)
-    return correct_spelling
+    return " ".join(correct_spelling)
 
 
-def get_synonyms(tokens: List[str]) -> List[List[str]]:
+def get_relaxed_query(tokens: List[str], doc_analyzer, mode) -> List[str]:
     """
     Gets all the possible combinations of all the tokens being
-    substitute by their synonyms
+    substitute by their synonyms or hypernyms
     """
-    # no funciona muy bien...
-    synonyms = []
-    for token in tokens:
-        try:
-            syns = wn.synsets(token)[0].lemma_names()
-            synonyms.append(syns)
-        except IndexError:
-            pass
-    return _get_combinations(synonyms, 5)
+    threshold = 0.8
+    hypernyms = {}
+    synonyms = {}
+    for i, token in enumerate(tokens):
+         # Iterating through query term list to check if the term is present in the corpus and qualifies the threshold
+        if token in doc_analyzer.index.token2id and idf(doc_analyzer, doc_analyzer.index.token2id[token]) > threshold:
+            for element in wn.synsets(token):
+            # hyp and syn lists corresponding to the hypernyms and synonyms of most common context
+                try:
+                    try:
+                        hypernyms[i].union(set(element.hypernyms()[0].lemma_names()))
+                        synonyms[i].union(set(element.lemma_names()))
+                    except KeyError:
+                        hypernyms[i] = set(element.hypernyms()[0].lemma_names())
+                        synonyms[i] = set(element.lemma_names())
+                except IndexError:
+                    pass
+
+    if mode == 'hypernym':
+        return get_alternative_tokens(tokens, threshold, hypernyms, doc_analyzer)
+    else:
+        return get_alternative_tokens(tokens, threshold, synonyms, doc_analyzer)
+
+
+def get_alternative_tokens(tokens: List[str], threshold: float, alternatives: Dict[int, set], doc_analyzer):
+    alternative_tokens = []
+    # Replacing the query term which crosses threshold with its hypernyms
+    for idx, alternatives in alternatives.items():
+        for word in alternatives:
+            # creating a copy of the original tokenized query
+            temp = tokens.copy()
+            # finding the index to make the replacement
+            term = temp[idx]
+            if term is not word and term in doc_analyzer.index.token2id and \
+                    idf(doc_analyzer, doc_analyzer.index.token2id[term]) > threshold:
+                # Making sure the original term and its hypernym are not the same
+                temp[idx] = word
+                # adding the relaxed query
+                alternative_tokens.append(" ".join(temp))
+    return alternative_tokens
 
 
 def _get_combinations(collection, n_comb):

@@ -5,7 +5,7 @@ from models import MRI
 from feedback import RocchioAlgorithm
 from typing import List, Tuple, Iterable
 from tools import Document
-from query_expansion import query_expansion_with_nltk
+from query_expansion import query_expansion
 from clustering import ClusterManager
 
 # TODO: Save the weights for every document in the collection for more efficiency
@@ -18,7 +18,7 @@ class IRSystem:
         if self.corpus.name != 'union':
             # with the union of the datasets, the cluster algorithm cannot run
             self.clusterer = ClusterManager(self.corpus)
-            self.clusterer.fit_cluster(8)
+            self.clusterer.fit_cluster(4)
         else:
             self.clusterer = None
         self.query_parser = QueryParser()
@@ -79,4 +79,4 @@ class IRSystem:
     def global_query_expansion(query: str):
         """Does global query expansion, returning a list of possible queries related with the original one"""
         query_tokens = QueryParser().parse(query)
-        return query_expansion_with_nltk(query_tokens)
+        return query_expansion(query_tokens)

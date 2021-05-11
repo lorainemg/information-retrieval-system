@@ -2,6 +2,7 @@
 from sklearn.cluster import KMeans
 from corpus import CorpusAnalyzer
 from yellowbrick.cluster import KElbowVisualizer
+from utils import tf, idf
 import numpy as np
 import pandas as pd
 import pickle
@@ -24,22 +25,22 @@ class ClusterManager:
         of the documents in the set.
         """
         examples = []
-        for doc_id in range(1, self.corpus.index.num_docs):
+        for doc_id in range(self.corpus.index.num_docs):
             examples.append(self.get_doc_vector(doc_id))
         return np.array(examples)
 
     def get_doc_vector(self, doc_id: int):
         """Gets the vector of a single document"""
         bow = self.corpus.doc2bow(doc_id)
-        vector = np.zeros(len(self.corpus.index))
+        tf_idf_vectors = np.zeros(len(self.corpus.index))
         for term_id, freq in bow.items():
-            vector[term_id] = freq
-        return vector
+            tf_idf_vectors[term_id] = tf(self.corpus, term_id, doc_id) * idf(self.corpus, term_id)
+        return tf_idf_vectors
 
     def elbow_method(self) -> int:
         """Gets the optimus k by the elbow method"""
-        # visualizer = KElbowVisualizer(self.model, k=(4, 20), metric='calinski_harabasz')
-        visualizer = KElbowVisualizer(KMeans(), k=(4, 20))
+        visualizer = KElbowVisualizer(self.model, k=(4, 20), metric='calinski_harabasz')
+        # visualizer = KElbowVisualizer(KMeans(), k=(4, 20))
         visualizer.fit(self.X)
         visualizer.show()
         return visualizer.elbow_value_
