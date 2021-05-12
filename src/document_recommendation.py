@@ -8,14 +8,14 @@ import os
 
 
 class DocumentRecommender:
-    def __init__(self, clusterer: ClusterManager, ratings: Dict[int, int]=None):
+    def __init__(self, clusterer: ClusterManager, corpus: CorpusAnalyzer, ratings: Dict[int, int]=None):
         """
         Document Recommender initialization
         :param clusterer: corpus with the documents
         :param ratings: ratings of the documents consisting in: [doc_id, rating]
         (usually a rating of 0 or 1 if the user found the document interesting)
         """
-        self.corpus: CorpusAnalyzer = clusterer.corpus
+        self.corpus: CorpusAnalyzer = corpus
         self.clusterer: ClusterManager = clusterer
         if ratings is None:
             # the ratings are obtained in the ratings folder

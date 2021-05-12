@@ -4,13 +4,12 @@ from models import VectorMRI
 from query_expansion import query_expansion
 from query import QueryParser
 from pathlib import Path
-from clustering import ClusterManager
-from document_recommendation import DocumentRecommender
+from crawler import WikiCrawler
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    lisa_analyzer = corpus.LisaCorpusAnalyzer(Path('../resources/corpus/lisa'))
-    lisa_system = IRSystem(VectorMRI(lisa_analyzer))
+    # lisa_analyzer = corpus.LisaCorpusAnalyzer(Path('../resources/corpus/lisa'))
+    # lisa_system = IRSystem(VectorMRI(lisa_analyzer))
 
     #
     # cran_analyzer = corpus.CranCorpusAnalyzer(Path('../ratings/corpus/cran/cran.all.1400'))
@@ -25,22 +24,30 @@ if __name__ == '__main__':
     # all_analyzer = corpus.UnionCorpusAnalyzer(Path('../ratings/corpus'))
     # all_system = IRSystem(VectorMRI(all_analyzer))
 
-    system = lisa_system
-    mri = system.model
-    analyzer = system.corpus
+    # system = lisa_system
+    # mri = system.model
+    # analyzer = system.corpus
+    # #
+    # query = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .'
+    # docs = system.make_query(query)
+    # similarity = mri.ranking_function(QueryParser()(query, analyzer.index))
     #
-    query = 'what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .'
-    docs = system.make_query(query)
-    similarity = mri.ranking_function(QueryParser()(query, analyzer.index))
-
-    relevance = [doc_id for doc_id, freq in similarity[:100] if freq > 10 and freq % 2 == 0]
-    total_docs = [doc_id for doc_id, _ in similarity[:100]]
-    new_query = system.user_feedback(query, relevance, total_docs)
+    # relevance = [doc_id for doc_id, freq in similarity[:100] if freq > 10 and freq % 2 == 0]
+    # total_docs = [doc_id for doc_id, _ in similarity[:100]]
+    # new_query = system.user_feedback(query, relevance, total_docs)
+    # #
+    # # q_vect = query_expansion(QueryParser().parse(query), lisa_analyzer)
+    # # print(q_vect)
     #
-    # q_vect = query_expansion(QueryParser().parse(query), lisa_analyzer)
-    # print(q_vect)
+    # docs = lisa_system.get_recommended_documents()
+    # print(docs)
 
-    docs = lisa_system.get_recommended_documents()
-    print(docs)
+    crawler = WikiCrawler()
+    crawler.crawl(10)
+    # page = crawler.go_to_link('file:///media/loly/02485E43485E359F/_Escuela/__UH/5to/SI/Proyecto final/Info/test_pages/International School of Dongguan - Wikipedia.html')
+    # crawler.get_document_info(page)
+    # crawler.get_links(page)
+    # print(crawler.documents)
+    # print(crawler.links)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

@@ -23,7 +23,7 @@ class IRSystem:
         else:
             self.clusterer = None
         self.query_parser = QueryParser()
-        self.document_recommender = DocumentRecommender(self.clusterer)
+        self.document_recommender = DocumentRecommender(self.clusterer, self.corpus)
 
     def make_query(self, query: str) -> List[Document]:
         """Makes a query with the loaded corpus and returns the documents sorted for relevancy"""
