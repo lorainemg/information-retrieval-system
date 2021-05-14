@@ -69,7 +69,7 @@ corpus_type = st.sidebar.selectbox(label='Select Corpus', options=[
 
 
 state = visual.session_state.get(system=create_system(
-    corpus_type), corpus_type="", feedback={}, query=None)
+    corpus_type), corpus_type="", feedback={}, query=None, documents = [])
 
 
 state.system = create_system(
@@ -85,30 +85,24 @@ feedback: Dict[str, List[int]] = state.feedback
 query = st.text_input(label='Search something', key='query')
 feedback[query] = []
 
-if(query is None or query == ""):
-    st.stop()
+
 
 expansion = system.global_query_expansion(query)
-print(expansion)
 query = st.selectbox( label='Expantions',
     options=[query] + expansion)
 
-with st.spinner():
-    suggested_docs = system.get_recommended_documents()
-#  Suggested Documents
-st.sidebar.header("Suggested Documents")
-i = 0
-for doc in suggested_docs:
-    if doc is None:
-        continue
-    st.sidebar.markdown(f'{i}. {doc.title}')
-    i += 1
 
-with st.spinner():
-    documents: List[Document] = get_query_result(query)
+# No reload if query is same or not new
+if(query is None or query == "" or 
+state.query == query):
+    documents = state.documents
+else:
+    with st.spinner(text= f'Searching: {query}'):
+        documents: List[Document] = get_query_result(query)
+        state.documents = documents
+        st.success(f"We found {len(documents)} matches")
 
-st.success(f"We found {len(documents)} matches")
-
+state.query = query
 
 def set_feedback(query: str, id: str):
     def _set(value: bool):
@@ -133,3 +127,14 @@ if st.button(label="Send Feedback"):
     totals = [doc.id for doc in documents]
     relevants = feedback[query]
     system.user_feedback(query, relevants, totals)
+
+if st.sidebar.button(label='Find Suggestions'):
+    with st.spinner(text= f'Looking for suggested docs...'):
+        suggested_docs = system.get_recommended_documents()
+    st.sidebar.header("Suggested Documents")
+    i = 0
+    for doc in suggested_docs:
+        if doc is None:
+            continue
+        st.sidebar.markdown(f'{i}. {doc.title}')
+        i += 1
