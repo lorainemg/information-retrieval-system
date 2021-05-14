@@ -64,6 +64,12 @@ def create_item(title, description=None,  on_feedback=None):
 page_size = st.sidebar.number_input(
     label='Number of results', value=20, step=10, help='The number of result show for every search')
 
+corpus_type = st.sidebar.selectbox(label='Select Corpus', options=[
+                                   'all', "cisi", "cran", "lisa", "npl"], index=0)
+
+
+state = visual.session_state.get(system=create_system(
+    corpus_type), corpus_type="", feedback={}, query=None)
 
 
 state.system = create_system(
@@ -74,6 +80,7 @@ state.corpus_type = corpus_type
 system: IRSystem = state.system
 feedback: Dict[str, List[int]] = state.feedback
 
+
 # Search Bar`
 query = st.text_input(label='Search something', key='query')
 feedback[query] = []
@@ -81,9 +88,10 @@ feedback[query] = []
 if(query is None or query == ""):
     st.stop()
 
-# expansion = system.global_query_expansion(query)
+expansion = system.global_query_expansion(query)
+print(expansion)
 query = st.selectbox( label='Expantions',
-    options=[query] + ['Option 1', 'Option 2', 'Option 3', 'Option 4', ])
+    options=[query] + expansion)
 
 with st.spinner():
     suggested_docs = system.get_recommended_documents()

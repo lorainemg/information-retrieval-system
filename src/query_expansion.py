@@ -4,6 +4,7 @@ from typing import List, Dict
 from nltk.corpus import words
 from nltk.metrics.distance import edit_distance
 from utils import idf
+import math
 
 
 def query_expansion(query: List[str], doc_analyzer, mode='hypernym') -> List[str]:
@@ -14,8 +15,11 @@ def query_expansion(query: List[str], doc_analyzer, mode='hypernym') -> List[str
     :return: list containing a list of alternate tokenized queries
     """
     tokens = spell_checking(query)
-    new_tokens = get_relaxed_query(query, doc_analyzer, mode)
-    return [tokens] + new_tokens
+    new_tokens = get_relaxed_query(query, doc_analyzer)
+    if tokens != query:
+        return [tokens] + new_tokens
+    else:
+        return new_tokens
 
 
 def spell_checking(tokens: List[str]) -> str:
@@ -29,33 +33,27 @@ def spell_checking(tokens: List[str]) -> str:
     return " ".join(correct_spelling)
 
 
-def get_relaxed_query(tokens: List[str], doc_analyzer, mode) -> List[str]:
+def get_relaxed_query(tokens: List[str], doc_analyzer) -> List[str]:
     """
     Gets all the possible combinations of all the tokens being
     substitute by their synonyms or hypernyms
     """
-    threshold = 0.8
-    hypernyms = {}
-    synonyms = {}
+    threshold = math.log2(len(doc_analyzer.documents) / 10)
+    alternatives = {}
     for i, token in enumerate(tokens):
-         # Iterating through query term list to check if the term is present in the corpus and qualifies the threshold
-        if token in doc_analyzer.index.token2id and idf(doc_analyzer, doc_analyzer.index.token2id[token]) < threshold:
+        # Iterating through query term list to check if the term is present in the corpus and qualifies the threshold
+        if token not in doc_analyzer.index.token2id or idf(doc_analyzer,
+                                                           doc_analyzer.index.token2id[token]) > threshold:
             for element in wn.synsets(token):
-            # hyp and syn lists corresponding to the hypernyms and synonyms of most common context
+                # hyp and syn lists corresponding to the hypernyms and synonyms of most common context
                 try:
                     try:
-                        hypernyms[i].union(set(element.hypernyms()[0].lemma_names()))
-                        synonyms[i].union(set(element.lemma_names()))
+                        alternatives[i].union(set(element.hypernyms()[0].lemma_names())).union(set(element.lemma_names()))
                     except KeyError:
-                        hypernyms[i] = set(element.hypernyms()[0].lemma_names())
-                        synonyms[i] = set(element.lemma_names())
+                        alternatives[i] = set(element.hypernyms()[0].lemma_names()).union(element.lemma_names())
                 except IndexError:
                     pass
-
-    if mode == 'hypernym':
-        return get_alternative_tokens(tokens, threshold, hypernyms, doc_analyzer)
-    else:
-        return get_alternative_tokens(tokens, threshold, synonyms, doc_analyzer)
+    return get_alternative_tokens(tokens, threshold, alternatives, doc_analyzer)
 
 
 def get_alternative_tokens(tokens: List[str], threshold: float, alternatives: Dict[int, set], doc_analyzer):
@@ -68,7 +66,7 @@ def get_alternative_tokens(tokens: List[str], threshold: float, alternatives: Di
             # finding the index to make the replacement
             term = temp[idx]
             if term is not word and term in doc_analyzer.index.token2id and \
-                    idf(doc_analyzer, doc_analyzer.index.token2id[term]) > threshold:
+                    idf(doc_analyzer, doc_analyzer.index.token2id[term]) <= threshold:
                 # Making sure the original term and its hypernym are not the same
                 temp[idx] = word
                 # adding the relaxed query
@@ -78,6 +76,7 @@ def get_alternative_tokens(tokens: List[str], threshold: float, alternatives: Di
 
 def _get_combinations(collection, n_comb):
     """In collection gives n_comb combinations"""
+
     def combinate(n, result, final_result):
         nonlocal n_comb
         if n_comb == 0:

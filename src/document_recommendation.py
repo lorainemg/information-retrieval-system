@@ -17,6 +17,7 @@ class DocumentRecommender:
         """
         self.corpus: CorpusAnalyzer = corpus
         self.clusterer: ClusterManager = clusterer
+        self.name = self.corpus.name
         if ratings is None:
             # the ratings are obtained in the ratings folder
             self.load_ratings()
@@ -100,12 +101,12 @@ class DocumentRecommender:
 
     def load_ratings(self):
         try:
-            self.ratings = json.load(open(Path('../resources/ratings/ratings.json'), 'r'))
+            self.ratings = json.load(open(Path(f'../resources/ratings/{self.name}_ratings.json'), 'r'))
         except FileNotFoundError:
             self.ratings = {}
 
     def save_ratings(self):
         try:
-            json.dump(self.ratings, open(Path('../resources/ratings/ratings.json'), 'w'))
+            json.dump(self.ratings, open(Path(f'../resources/ratings/{self.name}_ratings.json'), 'w'))
         except FileNotFoundError:
-            json.dump(self.ratings, open(Path('../resources/ratings/ratings.json'), 'x'))
+            json.dump(self.ratings, open(Path(f'../resources/ratings/{self.name}_ratings.json'), 'x'))

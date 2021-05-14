@@ -6,6 +6,7 @@ from corpus.cisi_corpus import CisiCorpusAnalyzer
 from corpus.cran_corpus import CranCorpusAnalyzer
 from corpus.lisa_corpus import LisaCorpusAnalyzer
 from corpus.npl_corpus import NplCorpusAnalyzer
+from tools import Document
 
 
 class UnionCorpusAnalyzer(CorpusAnalyzer):
@@ -27,4 +28,5 @@ class UnionCorpusAnalyzer(CorpusAnalyzer):
                 lisa_analyzer = LisaCorpusAnalyzer(corpus_path / file)
             elif file == 'npl':
                 npl_analyzer = NplCorpusAnalyzer(corpus_path / file / 'doc-text')
-        self.documents = cisi_analyzer.documents + cran_analyzer.documents + lisa_analyzer.documents + npl_analyzer.documents
+        for i, doc in enumerate(cisi_analyzer.documents + cran_analyzer.documents + lisa_analyzer.documents + npl_analyzer.documents):
+            self.documents.append(Document(i, doc.tokens, doc.title, doc.summary))
