@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 import time
 
-from streamlit.caching import cache
+from streamlit.caching import cache, suppress_cached_st_function_warning
 import visual.session_state
 
 from typing import List, Dict
@@ -16,8 +16,9 @@ from tools import Document
 # Logic
 
 
+@cache(show_spinner=False, persist=True, suppress_st_warning=True, allow_output_mutation=True)
 def create_system(type: str) -> IRSystem:
-    print('here')
+    print("Creating new system")
     if type == 'lisa':
         analyzer = corpus.LisaCorpusAnalyzer(Path('../resources/corpus/lisa'))
         return IRSystem(VectorMRI(analyzer))
@@ -41,7 +42,6 @@ def create_system(type: str) -> IRSystem:
         return IRSystem(VectorMRI(analyzer))
 
 
-@cache(show_spinner=False, suppress_st_warning=True, persist=True)
 def get_query_result(query: str) -> List[Document]:
     return state.system.make_query(query)
 
@@ -49,10 +49,8 @@ def get_query_result(query: str) -> List[Document]:
 
 
 def create_item(title, description=None,  on_feedback=None):
-
     contentCol, indxCol = st.beta_columns([11, 1])
     st.text("")
-    # indxCol.subheader(f'{index}.')
     indxCol.text("")
     contentCol.subheader(f'**{title}**')
     contentCol.write(description)
@@ -65,10 +63,13 @@ def create_item(title, description=None,  on_feedback=None):
 
 page_size = st.sidebar.number_input(
     label='Number of results', value=20, step=10, help='The number of result show for every search')
-state = visual.session_state.get(system=None, feedback={}, query=None)
 
-corpus_type = st.sidebar.selectbox(label='Select Corpus', options=['all', "cisi", "cran", "lisa", "npl"], index= 0)
-state.system = create_system(corpus_type)
+
+
+state.system = create_system(
+    corpus_type) if corpus_type != state.corpus_type else state.system
+state.corpus_type = corpus_type
+
 
 system: IRSystem = state.system
 feedback: Dict[str, List[int]] = state.feedback
@@ -77,12 +78,27 @@ feedback: Dict[str, List[int]] = state.feedback
 query = st.text_input(label='Search something', key='query')
 feedback[query] = []
 
-
 if(query is None or query == ""):
     st.stop()
 
-documents: List[Document] = get_query_result(query)
-print(documents)
+# expansion = system.global_query_expansion(query)
+query = st.selectbox( label='Expantions',
+    options=[query] + ['Option 1', 'Option 2', 'Option 3', 'Option 4', ])
+
+with st.spinner():
+    suggested_docs = system.get_recommended_documents()
+#  Suggested Documents
+st.sidebar.header("Suggested Documents")
+i = 0
+for doc in suggested_docs:
+    if doc is None:
+        continue
+    st.sidebar.markdown(f'{i}. {doc.title}')
+    i += 1
+
+with st.spinner():
+    documents: List[Document] = get_query_result(query)
+
 st.success(f"We found {len(documents)} matches")
 
 
