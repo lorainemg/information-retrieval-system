@@ -16,13 +16,14 @@ class IRSystem:
     def __init__(self, model: MRI):
         self.model = model
         self.corpus = model.doc_analyzer
+        stemming = self.corpus.stemmer is not None
         if self.corpus.name != 'union':
             # with the union of the datasets, the cluster algorithm cannot run
             self.clusterer = ClusterManager(self.corpus)
             self.clusterer.fit_cluster(4)
         else:
             self.clusterer = None
-        self.query_parser = QueryParser()
+        self.query_parser = QueryParser(stemming)
         self.document_recommender = DocumentRecommender(self.clusterer, self.corpus)
 
     def make_query(self, query: str) -> List[Document]:
@@ -38,14 +39,12 @@ class IRSystem:
 
         # Doing clustering to return related documents with the one with the highest score
         if self.clusterer is not None:
-            related_docs = self.clusterer.get_cluster_samples(docs[0].id)
-            related_docs = [self.corpus.id2doc(doc_id) for doc_id in related_docs[:10]]
-            docs = set(docs[:20]).union(set(related_docs[:10])).union(docs[20:])
-        docs = list(docs)
+            related_docs = self.clusterer.get_cluster_samples(self.corpus.documents.index(docs[0]))
+            related_docs = [self.corpus.documents[doc_id] for doc_id in related_docs[:10]]
+            docs = docs[:20] + [d for d in related_docs[:10] if d not in docs[:20]]
 
         # The most similar doc to the query is saved as relevant to the user for the document recommender
         self.document_recommender.add_rating(docs[0].id, 1)
-
         # maybe should return the ranking for relevance feedback
         return docs
 

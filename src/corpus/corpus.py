@@ -4,6 +4,7 @@ from gensim.corpora import Dictionary
 from pathlib import Path
 import nltk
 import pickle
+import os
 import json
 
 from tools import Document
@@ -11,11 +12,14 @@ from utils import remove_punctuation, convert_to_lower, tokenize
 
 
 class CorpusAnalyzer:
-    def __init__(self, corpus_path: Path, *, name='corpus'):
+    def __init__(self, corpus_path: Path, *, name='corpus', stemming=False):
         # A dictionary of documents where the keys are their identifier
         # and the value its a Document instance
         self.documents: List[Document] = []
-        self.stemmer = nltk.PorterStemmer()
+        if stemming:
+            self.stemmer = nltk.PorterStemmer()
+        else:
+            self.stemmer = None
         self.index: Dictionary = None
         self.name = name
         self.stopwords = set(nltk.corpus.stopwords.words('english'))
@@ -34,13 +38,13 @@ class CorpusAnalyzer:
         """
         raise NotImplementedError
 
-    def preprocess_text(self, text, stemming=True):
+    def preprocess_text(self, text):
         """Preprocess the text and returns a list of cleaned tokens"""
         text = remove_punctuation(text)
         text = convert_to_lower(text)
         tokens = tokenize(text)
         tokens = [tok for tok in tokens if tok not in self.stopwords]
-        if stemming:
+        if self.stemmer is not None:
             tokens = self.stemming(tokens)
         return tokens
 
@@ -53,16 +57,17 @@ class CorpusAnalyzer:
         self.index = Dictionary(docs)
 
     def save_indexed_document(self):
-        self.index.save(f'../resources/indexed_corpus/{self.name}/index.idx')
-        # Save the corpus in the Matrix Market format
-        pickle.dump(self.vectors, open(f'../resources/indexed_corpus/{self.name}/docs_vect.pkl', 'wb'))
-        pickle.dump(self.documents, open(f'../resources/indexed_corpus/{self.name}/docs.pkl', 'wb'))
-        # MmCorpus.serialize('../ratings/indexed_docs.mm', self.vectors)
+        indexed_corpus_path = Path(f'../resources/indexed_corpus/{self.name}/')
+        indexed_corpus_path.mkdir(exist_ok=True)
+        self.index.save(f'{indexed_corpus_path}/index.idx')
+        pickle.dump(self.vectors, open(indexed_corpus_path / 'docs_vect.pkl', 'wb'))
+        pickle.dump(self.documents, open(indexed_corpus_path / 'docs.pkl', 'wb'))
 
     def load_indexed_document(self):
-        self.index = Dictionary.load(f'../resources/indexed_corpus/{self.name}/index.idx')
-        self.vectors = pickle.load(open(f'../resources/indexed_corpus/{self.name}/docs_vect.pkl', 'rb'))
-        self.documents = pickle.load(open(f'../resources/indexed_corpus/{self.name}/docs.pkl', 'rb'))
+        indexed_corpus_path = Path(f'../resources/indexed_corpus/{self.name}/')
+        self.index = Dictionary.load(f'{indexed_corpus_path}/index.idx')
+        self.vectors = pickle.load(open(indexed_corpus_path / 'docs_vect.pkl', 'rb'))
+        self.documents = pickle.load(open(indexed_corpus_path / 'docs.pkl', 'rb'))
         # self.vectors = MmCorpus.load('../ratings/indexed_docs.mm')
 
     def id2doc(self, doc_id: int) -> Document:

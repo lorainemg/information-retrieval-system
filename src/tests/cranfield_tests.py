@@ -19,6 +19,7 @@ class CranfieldTestManager(TestFileManager):
         id_re = re.compile(r'\.I (\d+)')
         # marca cuando empieza el texto del documento actual
         getting_words = False
+        n = 1
         for line in query_fd.readlines():
             m = id_re.match(line)
             # se empieza una nueva query
@@ -26,7 +27,8 @@ class CranfieldTestManager(TestFileManager):
                 # había un documento actual que se guarda en la lista de documentos
                 if len(current_lines) > 0:
                     queries[current_id] = " ".join(current_lines)
-                current_id = int(m.group(1))
+                    n += 1
+                current_id = n
                 current_lines = []
                 getting_words = False
             elif line.startswith('.W'):

@@ -1,6 +1,6 @@
-from models import MRI
+from system import IRSystem
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 from query import QueryParser
 import json
 
@@ -29,7 +29,7 @@ class TestFileManager:
         """Parses the file located in `relation_path`"""
         raise NotImplementedError
 
-    def test_model(self, model: MRI, evaluation):
+    def test_model(self, system: IRSystem, evaluations):
         """
         Tests the model with the queries in `query_path` according to gold standard
         in `relation_path` using the given model and the given evaluation
@@ -37,19 +37,37 @@ class TestFileManager:
         :param evaluation: on of the evaluation metrics included in `evaluation.py`
         """
         total_score = []
+        n = 0
         for query_id, text in self.queries.items():
             # IDs of the relevant docs
             try:
                 doc_ids_rel = [int(doc_id) for doc_id in self.similarity_queries[query_id].keys()]
             except KeyError:
                 # the queries in the test and in the file doesn't have the same length
-                break
+                continue
             # Recovering the docs
-            ranking = model.ranking_function(self.query_parser(text, model.doc_analyzer.index))
+            documents = system.make_query(text)
             # IDs of the recovered docs
-            doc_ids_rec = [d[0] for d in ranking[:len(doc_ids_rel)]]
-            total_score.append(evaluation(doc_ids_rel, doc_ids_rec))
-        return sum(total_score) / len(total_score)
+            doc_ids_rec = [doc.id for doc in documents[:len(doc_ids_rel)]]
+            results = {}
+            for evaluation in evaluations:
+                results[evaluation.__name__] = evaluation(doc_ids_rel, doc_ids_rec)
+            total_score.append(results)
+            n += 1
+        print(n)
+        return self.get_final_results(total_score)
+
+    def get_final_results(self, results: List[Dict[str, float]]):
+        final_results = {}
+        for scores in results:
+            for name, score in scores.items():
+                try:
+                    final_results[name] += score
+                except KeyError:
+                    final_results[name] = score
+        for name, score in final_results.items():
+            final_results[name] = score / len(results)
+        return final_results
 
     def save_test_files(self):
         json.dump(self.queries, open(f'../resources/test/{self.name}_queries.json', 'w+'))

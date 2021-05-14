@@ -17,6 +17,7 @@ from tools import Document
 
 
 def create_system(type: str) -> IRSystem:
+    print('here')
     if type == 'lisa':
         analyzer = corpus.LisaCorpusAnalyzer(Path('../resources/corpus/lisa'))
         return IRSystem(VectorMRI(analyzer))
@@ -69,10 +70,6 @@ state = visual.session_state.get(system=None, feedback={}, query=None)
 corpus_type = st.sidebar.selectbox(label='Select Corpus', options=['all', "cisi", "cran", "lisa", "npl"], index= 0)
 state.system = create_system(corpus_type)
 
-
-    
-
-print('System created')
 system: IRSystem = state.system
 feedback: Dict[str, List[int]] = state.feedback
 
@@ -85,7 +82,7 @@ if(query is None or query == ""):
     st.stop()
 
 documents: List[Document] = get_query_result(query)
-
+print(documents)
 st.success(f"We found {len(documents)} matches")
 
 

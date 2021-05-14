@@ -39,7 +39,7 @@ def get_relaxed_query(tokens: List[str], doc_analyzer, mode) -> List[str]:
     synonyms = {}
     for i, token in enumerate(tokens):
          # Iterating through query term list to check if the term is present in the corpus and qualifies the threshold
-        if token in doc_analyzer.index.token2id and idf(doc_analyzer, doc_analyzer.index.token2id[token]) > threshold:
+        if token in doc_analyzer.index.token2id and idf(doc_analyzer, doc_analyzer.index.token2id[token]) < threshold:
             for element in wn.synsets(token):
             # hyp and syn lists corresponding to the hypernyms and synonyms of most common context
                 try:

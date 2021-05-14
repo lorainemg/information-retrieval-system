@@ -1,5 +1,5 @@
 import nltk
-import numpy as np
+import math
 
 
 def remove_punctuation(string: str) -> str:
@@ -28,4 +28,4 @@ def idf(doc_analyzer: "CorpusAnalyzer", ti: int) -> float:
     """idf of a term in a document"""
     N = len(doc_analyzer.documents)
     ni = doc_analyzer.index.dfs[ti]
-    return np.log2(N / ni)
+    return math.log2(N / ni)

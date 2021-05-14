@@ -15,10 +15,10 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
         the first line is the title
     """
 
-    def __init__(self, corpus_path, *, name='cran'):
+    def __init__(self, corpus_path, *, name='cran', stemming=False):
         # Regular expresion to extract the id of the document
         self.id_re: Pattern = re.compile(r'\.I (\d+)')
-        CorpusAnalyzer.__init__(self, corpus_path, name=name)
+        CorpusAnalyzer.__init__(self, corpus_path, name=name, stemming=stemming)
 
     def parse_documents(self, corpus_path):
         corpus_fd = open(corpus_path, 'r')
@@ -35,7 +35,7 @@ class CranCorpusAnalyzer(CorpusAnalyzer):
             if m is not None:
                 # había un documento actual que se guarda en la lista de documentos
                 if len(current_lines) > 0:
-                    tokens = self.preprocess_text(" ".join(current_lines), stemming=False)
+                    tokens = self.preprocess_text(" ".join(current_lines))
                     title = self.title_preprocessing(current_title)
                     summary = " ".join(current_lines[:20] + ['...'])
                     self.documents.append(Document(current_id, tokens, title, summary))

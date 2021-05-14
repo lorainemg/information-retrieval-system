@@ -13,6 +13,7 @@ develop-eggs/
 dist/
 downloads/
 si-env/
+doc/report/
 eggs/
 .eggs/
 .idea/

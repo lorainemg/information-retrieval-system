@@ -7,16 +7,19 @@ from utils import convert_to_lower, remove_punctuation, tokenize
 
 
 class QueryParser:
-    def __init__(self):
+    def __init__(self, stemming=False):
         self.stopwords = set(nltk.corpus.stopwords.words('english'))
-        self.stemmer = nltk.PorterStemmer()
+        if stemming:
+            self.stemmer = nltk.PorterStemmer()
+        else:
+            self.stemmer = None
 
-    def parse(self, text: str, stemming=False):
+    def parse(self, text: str):
         text = convert_to_lower(remove_punctuation(text))
         tokens = tokenize(text)
         tokens = [tok for tok in tokens if tok not in self.stopwords]
         # not sure if i should remove the stopwords in the query
-        if stemming:
+        if self.stemmer is not None:
             tokens = self.stemming(tokens)
         return tokens
 
@@ -29,7 +32,7 @@ class QueryParser:
         format: list of (token_id, token_count) 2-tuples.
         """
         if isinstance(text, str):
-            return index.doc2bow(self.parse(text, stemming=False))
+            return index.doc2bow(self.parse(text))
         else:
             return index.doc2bow(text)
 

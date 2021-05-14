@@ -5,14 +5,15 @@ from typing import List, Union
 from pathlib import Path
 import re
 import json
+import os
 
 
 class WikiCrawler:
     def __init__(self):
         self.documents = {}
         self.links: List = []
-        self.tags_start = re.compile(r"<(a|b|span|i|sup|p)[^<]*>")
-        self.tags_end = re.compile(r"</(a|b|span|i|sup|p)>")
+        self.tags_start = re.compile(r"<[^<]+>")
+        self.tags_end = re.compile(r"<[^<]+>")
         self.references = re.compile(r"\[\d+\]")
 
     def get_random_page(self) -> str:
@@ -63,6 +64,7 @@ class WikiCrawler:
             text = self.tags_start.sub("", text)
             text = self.tags_end.sub("", text)
             text = self.references.sub("", text)
+            text = text.replace("\n", "")
             paragraphs_list.append(text)
 
         summary_text = "\n".join(paragraphs_list)
@@ -77,7 +79,11 @@ class WikiCrawler:
             self.get_document_info(page)
             self.get_links(page)
         self.save_documents()
-
+        try:
+            os.removedirs(Path('../resources/indexed_corpus/wiki'))
+        except:
+            pass
+        
     def save_documents(self):
         try:
             json.dump(self.documents, open(Path('../resources/corpus/wiki_docs.json'), 'w', encoding='utf-8'), ensure_ascii=False)
@@ -85,4 +91,8 @@ class WikiCrawler:
             json.dump(self.documents, open(Path('../resources/corpus/wiki_docs.json'), 'x', encoding='utf-8'), ensure_ascii=False)
 
     def load_documents(self):
-        self.documents = json.load(open(Path('../resources/corpus/wiki_docs.json'), 'r', encoding='utf-8'), ensure_ascii=False)
+        self.documents = json.load(open(Path('../resources/corpus/wiki_docs.json'), 'r', encoding='utf-8'))
+    
+
+if __name__ == '__main__':
+    WikiCrawler().crawl(100)
