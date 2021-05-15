@@ -32,7 +32,8 @@ class VectorMRI(MRI):
                 sim = num / (math.sqrt(doc_weights_sqr) * math.sqrt(query_weights_sqr))
             except ZeroDivisionError:
                 sim = 0
-            ranking.append((doc.id, sim))
+            if sim > 0.3:
+                ranking.append((doc.id, sim))
         ranking.sort(key=lambda x: x[1], reverse=True)
         return ranking
 

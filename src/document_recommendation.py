@@ -83,7 +83,7 @@ class DocumentRecommender:
         else:
             documents = [doc_id for doc_id in range(len(self.corpus.documents))]
         rated_documents = [doc_id for doc_id in documents if doc_id in self.ratings]
-        numerator = sum(map(lambda d: self.similarity(doc_id, d)*self.predictor_baseline(d), rated_documents))
+        numerator = sum(map(lambda d: self.similarity(doc_id, d)*(self.ratings[d] - self.predictor_baseline(d)), rated_documents))
         denominator = sum(map(lambda d: self.similarity(doc_id, d), rated_documents))
         try:
             return self.predictor_baseline(doc_id) + numerator / denominator

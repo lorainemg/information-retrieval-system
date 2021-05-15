@@ -30,6 +30,8 @@ class CorpusAnalyzer:
             self.create_document_index()
             self.vectors = self.docs2bows()
             self.save_indexed_document()
+        # maps document id with index (somehow the are not the same)
+        self.mapping = {doc.id: i for i, doc in enumerate(self.documents)}
 
     def parse_documents(self, corpus_path: Path):
         """

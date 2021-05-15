@@ -35,7 +35,7 @@ class RocchioAlgorithm:
     def _sum_docs_vect(self, docs):
         sum_docs = {}
         for doc_id in docs:
-            for term_id, freq in self.corpus.doc2bow(doc_id).items():
+            for term_id, freq in self.corpus.doc2bow(self.corpus.mapping[doc_id]).items():
                 try:
                     sum_docs[term_id] += freq
                 except KeyError:

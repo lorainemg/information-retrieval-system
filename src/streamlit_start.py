@@ -37,6 +37,10 @@ def create_system(type: str) -> IRSystem:
         analyzer = corpus.CisiCorpusAnalyzer(
             Path('../resources/corpus/cisi/CISI.ALL'))
         return IRSystem(VectorMRI(analyzer))
+    if type == 'wiki':
+        analyzer = corpus.WikiCorpusAnalyzer(
+            Path('../resources/corpus/wiki_docs.json'))
+        return IRSystem(VectorMRI(analyzer))
     if type == 'all':
         analyzer = corpus.UnionCorpusAnalyzer(Path('../resources/corpus'))
         return IRSystem(VectorMRI(analyzer))
@@ -65,7 +69,7 @@ page_size = st.sidebar.number_input(
     label='Number of results', value=20, step=10, help='The number of result show for every search')
 
 corpus_type = st.sidebar.selectbox(label='Select Corpus', options=[
-                                   'all', "cisi", "cran", "lisa", "npl"], index=0)
+                                   'all', "cisi", "cran", "lisa", "npl", "wiki"], index=0)
 
 
 state = visual.session_state.get(system=create_system(
@@ -88,7 +92,7 @@ feedback[query] = []
 
 
 expansion = system.global_query_expansion(query)
-query = st.selectbox( label='Expantions',
+query = st.selectbox( label='Query Expansions',
     options=[query] + expansion)
 
 

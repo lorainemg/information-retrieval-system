@@ -26,7 +26,7 @@ class IRSystem:
         self.query_parser = QueryParser(stemming)
         self.document_recommender = DocumentRecommender(self.clusterer, self.corpus)
 
-    def make_query(self, query: str) -> List[Document]:
+    def make_query(self, query: str, ranking=False) -> List[Document]:
         """Makes a query with the loaded corpus and returns the documents sorted for relevancy"""
         query_vect = self.query_parser(query, self.corpus.index)
 
@@ -34,19 +34,25 @@ class IRSystem:
         new_query_vect = self._load_query(query)
         query_vect = query_vect if new_query_vect is None else new_query_vect
 
-        ranking = self.model.ranking_function(query_vect)
-        docs = self.model.get_similarity_docs(ranking)
+        doc_ranking = self.model.ranking_function(query_vect)
+        docs = self.model.get_similarity_docs(doc_ranking)
 
         # Doing clustering to return related documents with the one with the highest score
         if self.clusterer is not None:
-            related_docs = self.clusterer.get_cluster_samples(self.corpus.documents.index(docs[0]))
-            related_docs = [self.corpus.documents[doc_id] for doc_id in related_docs[:10]]
-            docs = docs[:20] + [d for d in related_docs[:10] if d not in docs[:20]]
+            try:
+                related_docs = self.clusterer.get_cluster_samples(self.corpus.mapping[docs[0].id])
+                related_docs = [self.corpus.documents[doc_id] for doc_id in related_docs[:10]]
+                docs = docs[:20] + [d for d in related_docs[:10] if d not in docs[:20]]
+            except:
+                pass
 
         # The most similar doc to the query is saved as relevant to the user for the document recommender
-        self.document_recommender.add_rating(docs[0].id, 1)
-        # maybe should return the ranking for relevance feedback
-        return docs
+        if len(docs) > 0:
+            self.document_recommender.add_rating(docs[0].id, 1)
+        if ranking:
+            return docs, doc_ranking
+        else:
+            return docs
 
     def _load_query(self, query: str):
         """Tries to find another vector for the query with the feedback model"""
@@ -67,7 +73,6 @@ class IRSystem:
 
         # For the recommender system: relevants docs are stored as interesting, non relevants as none
         self.document_recommender.add_ratings({doc_id: 1 for doc_id in relevant_docs})
-        self.document_recommender.add_ratings({doc_id: 0 for doc_id in non_relevant_docs})
 
         # Execution of the Rocchio Algorithm
         rocchio = RocchioAlgorithm(query, self.corpus, relevant_docs, non_relevant_docs)
@@ -85,7 +90,6 @@ class IRSystem:
 
         # For the recommender system: relevants docs are stored as interesting, non relevants as none
         self.document_recommender.add_ratings({doc_id: 1 for doc_id in relevant_docs})
-        self.document_recommender.add_ratings({doc_id: 0 for doc_id in non_relevant_docs})
 
         # Execution of the Rocchio Algorithm
         rocchio = RocchioAlgorithm(query, self.corpus, relevant_docs, non_relevant_docs)
@@ -107,4 +111,4 @@ class IRSystem:
         if len(self.document_recommender.ratings) == 0:
             return []
         docs_id = self.document_recommender.recommend_documents(5)
-        return [self.corpus.id2doc(doc_id) for doc_id in docs_id]
+        return [self.corpus.documents[doc_id] for doc_id in docs_id]

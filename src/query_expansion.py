@@ -14,9 +14,9 @@ def query_expansion(query: List[str], doc_analyzer, mode='hypernym') -> List[str
     :param mode: choose mode: hypernym for hypernym based relaxation, 'synonym' for synonym based relaxation
     :return: list containing a list of alternate tokenized queries
     """
-    tokens = spell_checking(query)
+    tokens, change = spell_checking(query)
     new_tokens = get_relaxed_query(query, doc_analyzer)
-    if tokens != query:
+    if change:
         return [tokens] + new_tokens
     else:
         return new_tokens
@@ -26,11 +26,14 @@ def spell_checking(tokens: List[str]) -> str:
     """Returns the correct spelling of every word in the list of tokens"""
     correct_words = words.words()
     correct_spelling = []
+    change = False
     for token in tokens:
         temp = [(edit_distance(token, w), w) for w in correct_words if w[0] == token[0]]
         word = min(temp, key=lambda x: x[0])[1]
+        if word != token:
+            change = True
         correct_spelling.append(word)
-    return " ".join(correct_spelling)
+    return " ".join(correct_spelling), change
 
 
 def get_relaxed_query(tokens: List[str], doc_analyzer) -> List[str]:

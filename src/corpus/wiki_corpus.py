@@ -12,5 +12,5 @@ class WikiCorpusAnalyzer(CorpusAnalyzer):
         docs = json.load(open(corpus_path, 'r', encoding='utf-8'))
         for id, (doc_tile, doc_text) in enumerate(docs.items()):
             text = self.preprocess_text(doc_text)
-            summary = doc_text[:100] + '...'
+            summary = doc_text[:500] + '...'
             self.documents.append(Document(id, text, doc_tile, summary))
