@@ -1,5 +1,25 @@
-# information-retrieval-system
+# Information Retrieval System
 
-In this repo, an Information Retrieval System based on the Vector Information Retrieval Model is implemented. The design of the system is exposed according to each stage of information retrieval and several of its functionalities are implemented.  A visual interface using `streamlit` is used. In addition, the evaluation of the system is performed on different test collections using different objective metrics.
+This repository implements an Information Retrieval System based on the Vector Information Retrieval Model. It includes a visual interface powered by `Streamlit` and provides evaluation using various objective metrics across different test collections.
+
+## Features
+
+- Implements Vector Information Retrieval Model
+- Visual interface using Streamlit
+- Evaluation with different test collections and objective metrics
+
+## Installation
+
+1. Clone the repository and install dependencies:
+2. Install dependencies
+```bash
+git clone https://github.com/lorainemg/information-retrieval-system.git
+cd information-retrieval-system
+pip install -r requirements.txt
+```
+3. Run the main program:
+```bash
+python main.py
+```
 
 For more information see https://github.com/lorainemg/information-retrieval-system/blob/main/doc/C511%20Loraine%20Monteagudo%2C%20Tony%20Raul%20Blanco.pdf
