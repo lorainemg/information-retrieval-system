@@ -7,6 +7,9 @@ This repository implements an Information Retrieval System based on the Vector I
 - Implements Vector Information Retrieval Model
 - Visual interface using Streamlit
 - Evaluation with different test collections and objective metrics
+- Clustering techniques to group documents
+- Implementation of a crawler to gain information.
+- NLP techniques and different metrics in different collections are applied to check the functionality of the system.
 
 ## Installation
 
