@@ -25,4 +25,6 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## Documentation
+
 For more information see https://github.com/lorainemg/information-retrieval-system/blob/main/doc/C511%20Loraine%20Monteagudo%2C%20Tony%20Raul%20Blanco.pdf
